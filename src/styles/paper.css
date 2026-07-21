@@ -1,0 +1,343 @@
+/* ============================================================
+   Papel y escritura manuscrita
+   Las reglas leen variables dinámicas (--_page-w, --hand-*)
+   que los componentes asignan inline por documento.
+   ============================================================ */
+
+/* ——— Fondos de papel ——— */
+.paper-bg {
+  background-color: var(--paper);
+}
+
+.paper-blanca {
+  background-color: var(--paper);
+}
+
+.paper-crema {
+  background-color: var(--paper-warm);
+}
+
+.paper-rayada {
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--_line-h, 40px) - 1px),
+    var(--paper-line) calc(var(--_line-h, 40px) - 1px),
+    var(--paper-line) var(--_line-h, 40px)
+  );
+  background-position: 0 var(--_line-offset, 30px);
+}
+
+.paper-cuadriculada {
+  background-color: var(--paper);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--_grid, 32px) - 1px),
+      var(--paper-line) calc(var(--_grid, 32px) - 1px),
+      var(--paper-line) var(--_grid, 32px)
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--_grid, 32px) - 1px),
+      var(--paper-line) calc(var(--_grid, 32px) - 1px),
+      var(--paper-line) var(--_grid, 32px)
+    );
+}
+
+.paper-punteada {
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, var(--paper-line) 1.1px, transparent 1.4px);
+  background-size: var(--_grid, 28px) var(--_grid, 28px);
+  background-position: 4px 4px;
+}
+
+.paper-libreta {
+  background-color: var(--paper-warm);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--_line-h, 40px) - 1px),
+    var(--paper-line) calc(var(--_line-h, 40px) - 1px),
+    var(--paper-line) var(--_line-h, 40px)
+  );
+  background-position: 0 var(--_line-offset, 30px);
+}
+
+.paper-academica {
+  background-color: var(--paper);
+}
+
+/* ——— Estructura de la página ——— */
+.page {
+  position: relative;
+  width: var(--_page-w);
+  height: var(--_page-h);
+  overflow: hidden;
+  box-shadow: var(--shadow-page);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.page-content {
+  position: absolute;
+  top: var(--paper-margin-block);
+  bottom: var(--paper-margin-block);
+  left: var(--paper-margin-inline);
+  right: var(--paper-margin-inline);
+  overflow: hidden;
+}
+
+.page.has-header .page-content {
+  top: calc(var(--paper-margin-block) + var(--paper-chrome-h));
+}
+
+.page.has-footer .page-content {
+  bottom: calc(var(--paper-margin-block) + var(--paper-chrome-h));
+}
+
+.page.has-margin-line .page-content {
+  left: var(--paper-margin-inline-start);
+}
+
+.page-margin-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--paper-margin-inline-start) - 18px);
+  width: 1px;
+  background: var(--paper-margin-line);
+  opacity: 0.65;
+}
+
+.page-header,
+.page-footer {
+  position: absolute;
+  left: var(--paper-margin-inline);
+  right: var(--paper-margin-inline);
+  height: var(--paper-chrome-h);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-hand);
+  font-size: calc(var(--hand-size) * 0.72);
+  color: color-mix(in oklch, var(--hand-ink) 62%, transparent);
+  pointer-events: none;
+}
+
+.page-header {
+  top: calc(var(--paper-margin-block) / 2 - var(--paper-chrome-h) / 2);
+  justify-content: center;
+}
+
+.page-footer {
+  bottom: calc(var(--paper-margin-block) / 2 - var(--paper-chrome-h) / 2);
+  justify-content: space-between;
+}
+
+.paper-academica .page-header {
+  border-bottom: 3px double color-mix(in oklch, var(--hand-ink) 30%, transparent);
+}
+
+.page-number {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklch, var(--hand-ink) 55%, transparent);
+}
+
+/* ——— Escritura manuscrita ——— */
+.hand-scope {
+  font-family: var(--font-hand);
+  font-size: var(--hand-size);
+  line-height: var(--hand-leading);
+  letter-spacing: var(--hand-tracking);
+  word-spacing: var(--hand-word-spacing);
+  font-weight: var(--hand-weight);
+  color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
+}
+
+/* Palabra con variación humana (jitter + inclinación) */
+.jw {
+  display: inline-block;
+  transform: translateY(var(--jy, 0px)) rotate(var(--jr, 0deg)) skewX(var(--js, 0deg));
+}
+
+/* ——— Tipografía del contenido Markdown ——— */
+.hand-scope p {
+  margin: 0 0 0.3em;
+}
+
+.hand-scope h1,
+.hand-scope h2,
+.hand-scope h3,
+.hand-scope h4,
+.hand-scope h5,
+.hand-scope h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0.55em 0 0.2em;
+}
+
+.hand-scope h1 {
+  font-size: 1.5em;
+}
+.hand-scope h2 {
+  font-size: 1.32em;
+}
+.hand-scope h3 {
+  font-size: 1.18em;
+}
+.hand-scope h4,
+.hand-scope h5,
+.hand-scope h6 {
+  font-size: 1.06em;
+}
+
+.hand-scope ul,
+.hand-scope ol {
+  padding-left: 1.3em;
+  margin: 0.15em 0 0.4em;
+}
+
+.hand-scope li {
+  margin: 0.05em 0;
+}
+
+.hand-scope li > input[type='checkbox'] {
+  appearance: none;
+  width: 0.85em;
+  height: 0.85em;
+  margin: 0 0.45em 0 -1.3em;
+  border: 1.5px solid color-mix(in oklch, var(--hand-ink) 70%, transparent);
+  border-radius: 3px;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.08em;
+}
+
+.hand-scope li > input[type='checkbox']:checked {
+  background: var(--paper-margin-line);
+  border-color: var(--paper-margin-line);
+}
+
+.hand-scope blockquote {
+  border-left: 2px solid var(--paper-margin-line);
+  padding-left: 0.8em;
+  margin: 0.3em 0 0.5em;
+  opacity: 0.9;
+}
+
+.hand-scope a {
+  color: inherit;
+  text-decoration: underline wavy var(--paper-margin-line) 1.5px;
+  text-underline-offset: 3px;
+}
+
+.hand-scope hr {
+  border: none;
+  height: 2px;
+  margin: 0.6em 0 0.8em;
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--hand-ink) 55%, transparent) 0 14px,
+    transparent 14px 22px
+  );
+}
+
+.hand-scope table {
+  border-collapse: collapse;
+  margin: 0.3em 0 0.6em;
+  font-size: 0.85em;
+}
+
+.hand-scope th,
+.hand-scope td {
+  border: 1.5px solid color-mix(in oklch, var(--hand-ink) 38%, transparent);
+  padding: 0.1em 0.5em;
+}
+
+.hand-scope th {
+  background: color-mix(in oklch, var(--paper-line) 24%, transparent);
+}
+
+.hand-scope code {
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  background: color-mix(in oklch, var(--paper-line) 30%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.05em 0.3em;
+}
+
+.hand-scope pre {
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  line-height: 1.55;
+  background: color-mix(in oklch, var(--paper-line) 22%, transparent);
+  border: 1.5px solid color-mix(in oklch, var(--hand-ink) 25%, transparent);
+  /* trazo irregular de cuaderno */
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: 0.7em 1em;
+  margin: 0.3em 0 0.6em;
+  overflow-x: auto;
+}
+
+.hand-scope pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+.hand-scope img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.hand-scope ::selection {
+  background: color-mix(in oklch, var(--paper-margin-line) 28%, transparent);
+}
+
+/* ——— KaTeX: las fórmulas conservan precisión ——— */
+.hand-scope .katex {
+  font-size: 1.04em;
+}
+
+/* Sin overflow oculto en vertical: los glifos manuscritos (Caveat, Kalam…)
+   sobresalen del em box de KaTeX y se cortarían si se recortara la caja. */
+.hand-scope .katex-display {
+  margin: 0.35em 0;
+}
+
+/* Fórmula inválida: chip comprensible, el código original se conserva */
+.latex-error-chip {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  color: var(--error);
+  background: color-mix(in oklch, var(--error) 8%, var(--paper));
+  border: 1px dashed var(--error);
+  border-radius: var(--radius-sm);
+  padding: 0.05em 0.4em;
+  cursor: help;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: baseline;
+}
+
+/* ——— Exportación sin fondo: página plana ——— */
+.page.export-flat {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.page.export-flat.paper-rayada,
+.page.export-flat.paper-libreta,
+.page.export-flat.paper-cuadriculada,
+.page.export-flat.paper-punteada,
+.page.export-flat.paper-crema {
+  background: #ffffff;
+}

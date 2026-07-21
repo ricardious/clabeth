@@ -1,0 +1,107 @@
+/* ============================================================
+   Base: cuerpo, foco, selección, scrollbars, animaciones
+   ============================================================ */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--primary) 24%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Scrollbars discretas, acordes al escritorio */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--outline-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--outline-strong);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Editor: cursor de tinta */
+.editor-textarea {
+  caret-color: var(--primary);
+  line-height: 1.7;
+}
+
+.editor-textarea::selection {
+  background: color-mix(in oklch, var(--primary) 18%, transparent);
+}
+
+/* ——— Animaciones ——— */
+@keyframes clabeth-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes clabeth-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.anim-fade-up {
+  animation: clabeth-fade-up 420ms var(--ease-out) both;
+}
+
+.anim-fade-in {
+  animation: clabeth-fade-in var(--dur-med) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-fade-in {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Diálogos nativos */
+dialog::backdrop {
+  background: color-mix(in oklch, var(--foreground) 42%, transparent);
+}
