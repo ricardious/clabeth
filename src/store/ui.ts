@@ -1,0 +1,47 @@
+import { create } from 'zustand';
+
+export type PreviewMode = 'continua' | 'una' | 'dos';
+export type InspectorTab = 'escritura' | 'papel' | 'latex' | null;
+export type MobileTab = 'escribir' | 'vista' | 'personalizar';
+
+export const ZOOM_MIN = 0.5;
+export const ZOOM_MAX = 2;
+export const ZOOM_STEP = 0.1;
+
+interface UiState {
+  sidebarOpen: boolean;
+  inspector: InspectorTab;
+  previewMode: PreviewMode;
+  zoom: number;
+  /** Página visible (0-based) en los modos «una» y «dos». */
+  currentPage: number;
+  mobileTab: MobileTab;
+  toggleSidebar: () => void;
+  setInspector: (tab: InspectorTab) => void;
+  setPreviewMode: (mode: PreviewMode) => void;
+  setZoom: (zoom: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  setCurrentPage: (page: number) => void;
+  setMobileTab: (tab: MobileTab) => void;
+}
+
+const clampZoom = (zoom: number): number =>
+  Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(zoom * 100) / 100));
+
+export const useUiStore = create<UiState>()((set) => ({
+  sidebarOpen: true,
+  inspector: 'escritura',
+  previewMode: 'continua',
+  zoom: 1,
+  currentPage: 0,
+  mobileTab: 'escribir',
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setInspector: (inspector) => set({ inspector }),
+  setPreviewMode: (previewMode) => set({ previewMode }),
+  setZoom: (zoom) => set({ zoom: clampZoom(zoom) }),
+  zoomIn: () => set((state) => ({ zoom: clampZoom(state.zoom + ZOOM_STEP) })),
+  zoomOut: () => set((state) => ({ zoom: clampZoom(state.zoom - ZOOM_STEP) })),
+  setCurrentPage: (currentPage) => set({ currentPage }),
+  setMobileTab: (mobileTab) => set({ mobileTab }),
+}));
