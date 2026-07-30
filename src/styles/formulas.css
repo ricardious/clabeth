@@ -1,0 +1,37 @@
+/* ============================================================
+   Fórmulas LaTeX con apariencia manuscrita controlada
+   ------------------------------------------------------------
+   Conserva la estructura y los símbolos precisos de KaTeX (∑ ∫ √ ∂ …
+   caen por fallback de glifo a las fuentes de KaTeX), pero las letras y
+   los dígitos toman la fuente manuscrita del documento, junto con su
+   tinta, opacidad e inclinación. Así la fórmula vive dentro de la hoja
+   en vez de parecer un bloque tipográfico pegado al texto.
+
+   Modos (via --formula-font / --formula-slant / --formula-italic):
+   - manuscrita: fuente a mano + inclinación, símbolos precisos.
+   - sutil:     tipografía KaTeX con la inclinación del texto.
+   - tipografica: KaTeX estándar (sin cambios).
+   ============================================================ */
+
+.hand-scope .katex {
+  display: inline-block;
+  font-family: var(--formula-font, KaTeX_Main), KaTeX_Main, 'Times New Roman', serif;
+  font-size: 1.08em;
+  color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
+  transform: skewX(var(--formula-slant, 0deg));
+  transform-origin: center left;
+}
+
+/* Las fórmulas en bloque ($$…$$) mantienen su layout de bloque centrado. */
+.hand-scope .katex-display > .katex {
+  display: block;
+}
+
+/* Variables y letras: toman el stack de la fórmula (manuscrita primero). */
+.hand-scope .katex .mathnormal,
+.hand-scope .katex .mathit {
+  font-family: inherit;
+  font-style: var(--formula-italic, italic);
+}
+/* Las variantes especiales (\mathbb, \mathcal, \mathfrak, …) no se tocan:
+   conservan sus propias fuentes de KaTeX y, con ello, su precisión. */
