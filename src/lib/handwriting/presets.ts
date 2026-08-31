@@ -1,15 +1,15 @@
-import type { HandwritingConfig, HandwritingPreset } from '../../types/handwriting';
+import type { HandwritingConfig, HandwritingPreset } from '../types/handwriting';
 
 export const DEFAULT_HANDWRITING: HandwritingConfig = {
-  fontId: 'caveat',
+  fontId: 'patrick',
   fontSize: 22,
   lineHeight: 1.9,
   letterSpacing: 0,
   wordSpacing: 2,
   slant: 0,
-  weight: 500,
+  weight: 400,
   inkId: 'grafito',
-  opacity: 1,
+  opacity: 0.92,
   jitterY: 1,
   jitterRot: 0.4,
   formulaStyle: 'manuscrita',
@@ -27,7 +27,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Escolar',
     description: 'Trazo redondo de rotulador y tinta azul.',
     config: {
-      fontId: 'kalam',
+      fontId: 'gochi',
       fontSize: 19,
       lineHeight: 2.05,
       letterSpacing: 0.4,
@@ -46,7 +46,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Técnica',
     description: 'Letra de plano: uniforme, compacta, precisa.',
     config: {
-      fontId: 'architects',
+      fontId: 'hw-3',
       fontSize: 17,
       lineHeight: 1.95,
       letterSpacing: 0.8,
@@ -65,7 +65,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Cursiva',
     description: 'Caligrafía enlazada de cuaderno personal.',
     config: {
-      fontId: 'labelle',
+      fontId: 'hw-4',
       fontSize: 21,
       lineHeight: 2.0,
       letterSpacing: 0,
@@ -84,7 +84,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Apuntes',
     description: 'Rápida y ligera, con energía de clase.',
     config: {
-      fontId: 'shadows',
+      fontId: 'playwrite-es',
       fontSize: 20,
       lineHeight: 1.8,
       letterSpacing: 0.5,
@@ -93,8 +93,8 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       weight: 400,
       inkId: 'grafito',
       opacity: 0.94,
-      jitterY: 1.8,
-      jitterRot: 1.1,
+      jitterY: 0.7,
+      jitterRot: 0.35,
       formulaStyle: 'manuscrita',
     },
   },
@@ -103,7 +103,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Elegante',
     description: 'Pluma firme y tinta roja: la firma de la casa.',
     config: {
-      fontId: 'caveat',
+      fontId: 'hw-7',
       fontSize: 24,
       lineHeight: 1.95,
       letterSpacing: 0.3,
