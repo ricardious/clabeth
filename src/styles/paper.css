@@ -4,6 +4,24 @@
    que los componentes asignan inline por documento.
    ============================================================ */
 
+.template-hand-preview {
+  font-family: var(--template-font);
+  color: var(--template-ink);
+}
+
+.preset-hand-preview {
+  font-family: var(--preset-font);
+  color: var(--preset-ink);
+  font-weight: var(--preset-weight);
+}
+
+.landing-demo-content {
+  top: 22px;
+  right: var(--paper-margin-inline);
+  bottom: 18px;
+  left: var(--paper-margin-inline-start);
+}
+
 /* ——— Fondos de papel ——— */
 .paper-bg {
   background-color: var(--paper);
@@ -80,6 +98,49 @@
   box-shadow: var(--shadow-page);
   border-radius: 2px;
   flex-shrink: 0;
+  isolation: isolate;
+}
+
+/* Fibra, variación tonal y desgaste sutil. Son capas procedurales: no añaden
+   imágenes pesadas, escalan con nitidez y aparecen también en la exportación. */
+.page::before,
+.page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.page::before {
+  z-index: 0;
+  background-image:
+    url('/textures/paper-grain.svg'),
+    repeating-linear-gradient(
+      97deg,
+      transparent 0 17px,
+      var(--paper-fiber) 17.5px,
+      transparent 18px 43px
+    ),
+    repeating-linear-gradient(
+      4deg,
+      transparent 0 29px,
+      var(--paper-fiber-light) 29.5px,
+      transparent 30px 67px
+    ),
+    radial-gradient(ellipse at 18% 24%, var(--paper-fiber-light), transparent 32%),
+    radial-gradient(ellipse at 76% 68%, var(--paper-fiber), transparent 38%);
+  background-size: 384px 384px, 113px 79px, 157px 131px, 100% 100%, 100% 100%;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+}
+
+.page::after {
+  z-index: 3;
+  box-shadow:
+    inset 0 0 42px color-mix(in oklch, var(--paper-edge) 52%, transparent),
+    inset 1px 0 var(--paper-fiber-light),
+    inset -1px 0 var(--paper-fiber);
+  opacity: 0.58;
 }
 
 .page-content {
@@ -89,6 +150,35 @@
   left: var(--paper-margin-inline);
   right: var(--paper-margin-inline);
   overflow: hidden;
+  z-index: 2;
+}
+
+/* El DOM conserva layout, semántica, KaTeX y selección. Canvas reemplaza sólo
+   la pintura de las palabras cuando su render terminó correctamente. */
+.canvas-handwriting-source .jw {
+  transform: none;
+}
+
+.handwriting-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.canvas-handwriting-ready .handwriting-canvas {
+  opacity: 1;
+}
+
+.canvas-handwriting-ready .canvas-handwriting-source .jw {
+  color: transparent;
+  text-shadow: none;
+}
+
+.canvas-handwriting-ready::before {
+  display: none;
 }
 
 .page.has-header .page-content {
@@ -111,6 +201,9 @@
   width: 1px;
   background: var(--paper-margin-line);
   opacity: 0.65;
+  z-index: 2;
+  filter: blur(0.15px);
+  mix-blend-mode: multiply;
 }
 
 .page-header,
@@ -125,6 +218,9 @@
   font-size: calc(var(--hand-size) * 0.72);
   color: color-mix(in oklch, var(--hand-ink) 62%, transparent);
   pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: multiply;
+  text-shadow: 0.02em 0.015em 0.025em var(--ink-absorption);
 }
 
 .page-header {
@@ -157,12 +253,21 @@
   word-spacing: var(--hand-word-spacing);
   font-weight: var(--hand-weight);
   color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
+  mix-blend-mode: multiply;
+  text-rendering: optimizeLegibility;
 }
 
-/* Palabra con variación humana (jitter + inclinación) */
+/* Presión y sangrado simulan varias pasadas microscópicas del trazo. */
 .jw {
   display: inline-block;
-  transform: translateY(var(--jy, 0px)) rotate(var(--jr, 0deg)) skewX(var(--js, 0deg));
+  opacity: var(--jp, 1);
+  transform: translateY(var(--jy, 0px)) rotate(var(--jr, 0deg)) skewX(var(--js, 0deg))
+    scaleX(var(--jx, 1));
+  transform-origin: 50% 72%;
+  text-shadow:
+    var(--jbx, 0px) var(--jby, 0px) 0.018em
+      color-mix(in oklch, var(--hand-ink) 24%, transparent),
+    -0.04px -0.03px 0.012em color-mix(in oklch, var(--hand-ink) 16%, transparent);
 }
 
 /* ——— Tipografía del contenido Markdown ——— */
@@ -339,5 +444,24 @@
 .page.export-flat.paper-cuadriculada,
 .page.export-flat.paper-punteada,
 .page.export-flat.paper-crema {
-  background: #ffffff;
+  background: var(--paper);
+}
+
+.page.export-flat::before,
+.page.export-flat::after {
+  display: none;
+}
+
+/* Sin papel se recupera el texto DOM sobre blanco. El Canvas contiene una
+   textura opaca, por lo que no puede reutilizarse para esta opción. */
+.page.export-flat .handwriting-canvas {
+  display: none;
+}
+
+.page.export-flat.canvas-handwriting-ready .canvas-handwriting-source .jw {
+  color: inherit;
+  text-shadow:
+    var(--jbx, 0px) var(--jby, 0px) 0.018em
+      color-mix(in oklch, var(--hand-ink) 24%, transparent),
+    -0.04px -0.03px 0.012em color-mix(in oklch, var(--hand-ink) 16%, transparent);
 }
