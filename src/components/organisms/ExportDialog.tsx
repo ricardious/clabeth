@@ -4,12 +4,18 @@ import type { ExportFormat, ExportOptions, ExportProgress, ExportRange } from '.
 import { Button } from '../atoms/Button';
 import { Dialog } from '../atoms/Dialog';
 import { Input } from '../atoms/Input';
-import { Select } from '../atoms/Select';
+import { Select, type SelectItem } from '../atoms/Select';
 import { Switch } from '../atoms/Switch';
 import { Separator } from '../atoms/Separator';
 import { ErrorNotice } from '../molecules/ErrorNotice';
 import { RenderingStatus } from '../molecules/RenderingStatus';
 import { cn } from '../../lib/utils/cn';
+
+const SCALE_OPTIONS: SelectItem[] = [
+  { value: '1', label: 'Normal (1×)' },
+  { value: '2', label: 'Alta (2×)', hint: 'Recomendada' },
+  { value: '3', label: 'Muy alta (3×)' },
+];
 
 export interface ExportDialogProps {
   open: boolean;
@@ -30,7 +36,7 @@ function OptionButton({ active, label, onClick }: { active: boolean; label: stri
       onClick={onClick}
       className={cn(
         'flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors duration-[var(--dur-fast)]',
-        active ? 'border-focus-ring bg-primary-soft text-primary' : 'border-outline bg-surface text-foreground hover:bg-panel',
+        active ? 'border-focus-ring bg-primary-soft text-primary' : 'border-outline bg-surface text-foreground hover:bg-hover',
       )}
     >
       {label}
@@ -137,11 +143,12 @@ export function ExportDialog({ open, busy, progress, error, totalPages, currentP
 
           <div>
             <span className="mb-1.5 block text-[13px] font-medium text-foreground">Calidad</span>
-            <Select value={scale} onChange={(event) => setScale(Number(event.target.value) as 1 | 2 | 3)} aria-label="Calidad de exportación">
-              <option value={1}>Normal (1×)</option>
-              <option value={2}>Alta (2×) — recomendada</option>
-              <option value={3}>Muy alta (3×)</option>
-            </Select>
+            <Select
+              value={String(scale)}
+              onChange={(next) => setScale(Number(next) as 1 | 2 | 3)}
+              options={SCALE_OPTIONS}
+              label="Calidad de exportación"
+            />
           </div>
 
           <Separator />
