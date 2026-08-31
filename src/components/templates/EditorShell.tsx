@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Eye, PenLine, SlidersHorizontal } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useIsMobile } from '../../hooks/use-media-query';
-import { useUiStore } from '../../store/ui';
+import { useUiStore } from '../../lib/store/ui';
 import { Tabs } from '../atoms/Tabs';
 
 export interface EditorShellProps {
