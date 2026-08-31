@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -7,21 +8,22 @@ import {
   type ReactNode,
 } from 'react';
 import { GalleryVertical, Maximize, Minimize, RectangleHorizontal, Square } from 'lucide-react';
-import type { ClabethDocument } from '../../types/document';
-import type { PaperConfig } from '../../types/paper';
-import type { HandwritingConfig } from '../../types/handwriting';
+import type { ClabethDocument } from '../../lib/types/document';
+import type { PaperConfig } from '../../lib/types/paper';
+import type { HandwritingConfig } from '../../lib/types/handwriting';
 import type { MdBlock } from '../../lib/markdown/blocks';
-import type { PreviewMode } from '../../store/ui';
+import type { PreviewMode } from '../../lib/store/ui';
 import { splitIntoBlocks } from '../../lib/markdown/blocks';
 import { contentHeight, contentWidth } from '../../lib/paper/styles';
 import { handCssVars } from '../../lib/handwriting/css-vars';
 import { usePagination } from '../../hooks/use-pagination';
 import { IconButton } from '../atoms/IconButton';
-import { Spinner } from '../atoms/Spinner';
 import { Separator } from '../atoms/Separator';
+import { RenderingStatus } from '../molecules/RenderingStatus';
 import { ZoomControls } from '../molecules/ZoomControls';
 import { PageNavigator } from '../molecules/PageNavigator';
 import { PreviewPage } from './PreviewPage';
+import type { CanvasRenderState } from './CanvasHandwritingLayer';
 import { MarkdownBlock } from './MarkdownBlock';
 import { cn } from '../../lib/utils/cn';
 
@@ -37,6 +39,8 @@ export interface PaginatedPreviewProps {
   onModeChange?: (mode: PreviewMode) => void;
   onPageChange?: (page: number) => void;
   onPagesChange?: (count: number) => void;
+  renderingPreviewKey?: string | null;
+  onPreviewRenderReady?: (renderKey: string) => void;
   /** Recibe los elementos DOM de las páginas montadas (exportación). */
   registerPages?: (elements: HTMLElement[]) => void;
 }
@@ -62,6 +66,8 @@ export function PaginatedPreview({
   onModeChange,
   onPageChange,
   onPagesChange,
+  renderingPreviewKey = null,
+  onPreviewRenderReady,
   registerPages,
 }: PaginatedPreviewProps) {
   const paper = paperOverride ?? document.paper;
@@ -74,6 +80,7 @@ export function PaginatedPreview({
   const measurerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLElement | null)[]>([]);
+  const readyPreviewPages = useRef<Set<number>>(new Set());
   const [fullscreen, setFullscreen] = useState(false);
 
   const rawPages = usePagination(measurerRef, blocks, contentHeight(paper), measureKey);
@@ -111,6 +118,23 @@ export function PaginatedPreview({
     const first = Math.min(currentPage - (currentPage % 2), pages.length - 1);
     return first + 1 < pages.length ? [first, first + 1] : [first];
   }, [pages, mode, currentPage]);
+
+  useLayoutEffect(() => {
+    if (renderingPreviewKey) readyPreviewPages.current.clear();
+  }, [renderingPreviewKey]);
+
+  const handlePageRenderState = useCallback(
+    (pageIndex: number, renderKey: string, state: CanvasRenderState): void => {
+      if (!renderingPreviewKey || renderKey !== renderingPreviewKey) return;
+      if (state !== 'ready' && state !== 'error') return;
+
+      readyPreviewPages.current.add(pageIndex);
+      if (visibleIndices.length > 0 && visibleIndices.every((index) => readyPreviewPages.current.has(index))) {
+        onPreviewRenderReady?.(renderKey);
+      }
+    },
+    [onPreviewRenderReady, renderingPreviewKey, visibleIndices],
+  );
 
   useLayoutEffect(() => {
     if (!registerPages || !pages) return;
@@ -180,11 +204,7 @@ export function PaginatedPreview({
           </div>
         </div>
 
-        {pages === null ? (
-          <div className="flex h-full items-center justify-center gap-2 text-sm text-muted">
-            <Spinner label="Preparando hojas" /> Preparando hojas…
-          </div>
-        ) : (
+        {pages === null ? null : (
           <div
             className={cn(
               'flex gap-6 p-6',
@@ -203,10 +223,25 @@ export function PaginatedPreview({
                 pageIndex={pageIndex}
                 totalPages={totalPages}
                 zoom={zoom}
+                onRenderStateChange={handlePageRenderState}
               />
             ))}
           </div>
         )}
+
+        {renderingPreviewKey ? (
+          <RenderingStatus
+            title="Aplicando cambios"
+            description="Redibujando la tinta, la escritura y el papel de las hojas visibles."
+            detail="La vista anterior permanecerá oculta hasta que el resultado esté listo."
+          />
+        ) : pages === null ? (
+          <RenderingStatus
+            title="Preparando tus hojas"
+            description="Distribuyendo el contenido y calculando los saltos de página."
+            detail="La vista previa aparecerá automáticamente."
+          />
+        ) : null}
       </div>
     </div>
   );
