@@ -1,0 +1,143 @@
+---
+import {
+  BookOpenText,
+  Files,
+  House,
+  LayoutTemplate,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+  Sigma,
+} from '@lucide/astro';
+import BaseLayout from './BaseLayout.astro';
+import ThemeToggle from '../components/molecules/ThemeToggle.astro';
+import TopBar from '../components/organisms/TopBar.astro';
+import Logo from '../components/atoms/Logo.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const navItems = [
+  { href: '/app', label: 'Documentos', icon: Files },
+  { href: '/app/plantillas', label: 'Plantillas', icon: LayoutTemplate },
+  { href: '/app/guias/markdown', label: 'Guía Markdown', icon: BookOpenText },
+  { href: '/app/guias/latex', label: 'Guía LaTeX', icon: Sigma },
+  { href: '/app/ajustes', label: 'Ajustes', icon: Settings },
+];
+---
+
+<BaseLayout title={`${title} — Clabeth`} bodyClass="overflow-hidden">
+  <div class="flex h-full">
+    <button
+      id="mobile-nav-open"
+      type="button"
+      aria-label="Abrir navegación"
+      class="fixed left-2 top-2 z-30 inline-flex size-9 items-center justify-center rounded-md bg-surface text-muted shadow-panel hover:text-foreground md:hidden"
+    >
+      <PanelLeftOpen size={17} aria-hidden="true" />
+    </button>
+    <button
+      id="nav-backdrop"
+      type="button"
+      aria-label="Cerrar navegación"
+      class="fixed inset-0 z-30 hidden bg-[color-mix(in_oklch,var(--foreground)_35%,transparent)] md:hidden"
+    ></button>
+    <nav
+      id="side-nav"
+      aria-label="Navegación principal"
+      class="fixed left-0 top-0 z-40 flex h-full w-[var(--sidebar-w)] -translate-x-full shrink-0 flex-col border-r border-outline bg-surface shadow-pop transition-[width,transform] duration-[var(--dur-med)] md:relative md:translate-x-0 md:shadow-none"
+    >
+      <div class="flex h-[var(--topbar-h)] items-center justify-between border-b border-outline px-3">
+        <a href="/" aria-label="Ir a la portada de Clabeth" data-nav-label><Logo size="sm" /></a>
+        <button id="nav-toggle" type="button" aria-label="Contraer navegación" class="inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-panel hover:text-foreground">
+          <span data-collapse-icon><PanelLeftClose size={16} aria-hidden="true" /></span>
+          <span data-expand-icon hidden><PanelLeftOpen size={16} aria-hidden="true" /></span>
+        </button>
+      </div>
+      <div class="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <a
+              href={href}
+              title={label}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors duration-[var(--dur-fast)]',
+                active ? 'bg-primary-soft font-medium text-primary' : 'text-muted hover:bg-panel hover:text-foreground',
+              ]}
+            >
+              <Icon size={17} aria-hidden="true" class="shrink-0" />
+              <span class="truncate" data-nav-label>{label}</span>
+            </a>
+          );
+        })}
+      </div>
+      <div class="border-t border-outline p-2">
+        <div class="flex items-center justify-between gap-1">
+          <a href="/" title="Portada" class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted hover:bg-panel hover:text-foreground">
+            <House size={17} aria-hidden="true" />
+            <span data-nav-label>Portada</span>
+          </a>
+          <ThemeToggle />
+        </div>
+      </div>
+    </nav>
+    <div class="flex min-w-0 flex-1 flex-col">
+      <TopBar title={title} />
+      <main class="min-h-0 flex-1 overflow-y-auto"><slot /></main>
+    </div>
+  </div>
+
+  <script>
+    const nav = window.document.querySelector<HTMLElement>('#side-nav');
+    const toggle = window.document.querySelector<HTMLButtonElement>('#nav-toggle');
+    const backdrop = window.document.querySelector<HTMLButtonElement>('#nav-backdrop');
+    const mobileOpen = window.document.querySelector<HTMLButtonElement>('#mobile-nav-open');
+    const desktop = window.matchMedia('(min-width: 768px)');
+    let collapsed = false;
+
+    function renderNav(): void {
+      if (!nav || !toggle || !backdrop || !mobileOpen) return;
+      if (desktop.matches) {
+        nav.classList.remove('-translate-x-full');
+        nav.classList.toggle('w-[var(--rail-w)]', collapsed);
+        nav.classList.toggle('w-[var(--sidebar-w)]', !collapsed);
+        backdrop.classList.add('hidden');
+      }
+      const mobileClosed = !desktop.matches && nav.classList.contains('-translate-x-full');
+      nav.inert = mobileClosed;
+      mobileOpen.hidden = !desktop.matches && !mobileClosed;
+      nav.querySelectorAll<HTMLElement>('[data-nav-label]').forEach((label) => {
+        label.hidden = desktop.matches && collapsed;
+      });
+      toggle.querySelector<HTMLElement>('[data-collapse-icon]')!.hidden = desktop.matches && collapsed;
+      toggle.querySelector<HTMLElement>('[data-expand-icon]')!.hidden = !(desktop.matches && collapsed);
+      toggle.setAttribute('aria-label', collapsed ? 'Expandir navegación' : 'Contraer navegación');
+    }
+
+    toggle?.addEventListener('click', () => {
+      if (desktop.matches) collapsed = !collapsed;
+      else {
+        nav?.classList.toggle('-translate-x-full');
+        backdrop?.classList.toggle('hidden');
+      }
+      renderNav();
+    });
+    backdrop?.addEventListener('click', () => {
+      nav?.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+      renderNav();
+    });
+    mobileOpen?.addEventListener('click', () => {
+      nav?.classList.remove('-translate-x-full');
+      backdrop?.classList.remove('hidden');
+      renderNav();
+    });
+    desktop.addEventListener('change', renderNav);
+    renderNav();
+  </script>
+</BaseLayout>
