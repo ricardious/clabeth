@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ClabethDocument } from '../../types/document';
-import type { ExportOptions } from '../../types/export';
+import type { ClabethDocument } from '../../lib/types/document';
+import type { ExportOptions, ExportProgress } from '../../lib/types/export';
 import { resolvePageIndices } from '../../lib/export/options';
 import { buildPdf, captureNodeAsPng, downloadPngFiles } from '../../lib/export/capture';
 import { pageDimensions } from '../../lib/paper/styles';
@@ -15,6 +15,7 @@ export interface ExportJob {
 export interface ExportRunnerProps {
   document: ClabethDocument;
   job: ExportJob;
+  onProgress: (progress: ExportProgress) => void;
   onDone: (error: string | null) => void;
 }
 
@@ -24,12 +25,10 @@ export interface ExportRunnerProps {
  * archivo resultante. La exportación usa exactamente los mismos nodos de
  * página que la vista previa: lo que ves es lo que sale.
  *
- * Las páginas se capturan desde clones colocados en el DOM (fuera de la
- * vista y fuera del árbol de React): así las fuentes y estilos heredados
- * se resuelven igual que en la vista previa, y una re-medición de React
- * no puede cancelar ni corromper la captura a mitad de camino.
+ * La vista de exportación ya está montada fuera de pantalla. Se captura el
+ * nodo vivo porque cloneNode no copia el bitmap interno de un canvas.
  */
-export function ExportRunner({ document, job, onDone }: ExportRunnerProps) {
+export function ExportRunner({ document, job, onProgress, onDone }: ExportRunnerProps) {
   const [snapshotElements, setSnapshotElements] = useState<HTMLElement[] | null>(null);
   const started = useRef(false);
 
@@ -55,26 +54,29 @@ export function ExportRunner({ document, job, onDone }: ExportRunnerProps) {
 
     void (async () => {
       try {
+        onProgress({ phase: 'preparing', current: 0, total: 0 });
         await window.document.fonts.ready;
         const indices = resolvePageIndices(job.options, snapshotElements.length, job.currentPage);
         const images: string[] = [];
-        for (const index of indices) {
-          // Clon de la página dentro del documento, lejos de la vista y de React.
-          const clone = snapshotElements[index].cloneNode(true) as HTMLElement;
-          clone.style.position = 'fixed';
-          clone.style.left = '-10000px';
-          clone.style.top = '0';
-          clone.style.zIndex = '-1';
-          window.document.body!.appendChild(clone);
-          try {
-            images.push(
-              await captureNodeAsPng(clone, job.options.scale, !job.options.includeBackground),
-            );
-          } finally {
-            clone.remove();
+        for (const [position, index] of indices.entries()) {
+          onProgress({ phase: 'rendering', current: position + 1, total: indices.length });
+          const page = snapshotElements[index];
+          const canvas = page.querySelector<HTMLCanvasElement>('.handwriting-canvas');
+          // registerPages ocurre antes del render asíncrono del papel. Esperar
+          // evita exportar el canvas vacío de 300×150 que crea el navegador.
+          if (canvas) {
+            const deadline = performance.now() + 5000;
+            while (canvas.dataset.renderState !== 'ready' && canvas.dataset.renderState !== 'error') {
+              if (performance.now() >= deadline) break;
+              await new Promise((resolve) => window.setTimeout(resolve, 30));
+            }
           }
+          images.push(
+            await captureNodeAsPng(page, job.options.scale, !job.options.includeBackground),
+          );
         }
 
+        onProgress({ phase: 'finishing', current: indices.length, total: indices.length });
         const base = `clabeth-${slugify(document.title)}`;
         if (job.options.format === 'png') {
           await downloadPngFiles(images, base);
