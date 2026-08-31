@@ -1,4 +1,4 @@
-import type { InkColor } from '../../types/handwriting';
+import type { InkColor } from '../types/handwriting';
 
 export const INK_COLORS: InkColor[] = [
   { id: 'grafito', name: 'Grafito', token: '--ink-grafito' },
