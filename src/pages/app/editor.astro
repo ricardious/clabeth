@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { EditorWorkspace } from '../../components/organisms/EditorWorkspace';
+import '../../styles/fonts-handwriting.css';
+---
+
+<BaseLayout title="Editor — Clabeth" bodyClass="overflow-hidden">
+  <EditorWorkspace client:only="react" />
+</BaseLayout>
