@@ -36,6 +36,10 @@
   --paper-warm: oklch(0.945 0.025 85);
   --paper-line: oklch(0.83 0.03 75);
   --paper-margin-line: oklch(0.54 0.18 28);
+  --paper-fiber: oklch(0.47 0.025 75 / 0.08);
+  --paper-fiber-light: oklch(1 0 0 / 0.28);
+  --paper-edge: oklch(0.42 0.035 70 / 0.11);
+  --ink-absorption: oklch(0.18 0.02 55 / 0.22);
   --handwriting: oklch(0.3 0.02 55);
 
   /* ——— Tintas seleccionables ——— */
@@ -90,9 +94,9 @@
   --hand-tracking: 0px;
   --hand-word-spacing: 2px;
   --hand-slant: 0deg;
-  --hand-weight: 500;
+  --hand-weight: 400;
   --hand-ink: var(--ink-grafito);
-  --hand-opacity: 1;
+  --hand-opacity: 0.92;
 
   /* ——— Movimiento ——— */
   --dur-fast: 120ms;
