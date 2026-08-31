@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { PaperStyleDef } from '../../types/paper';
+import type { PaperStyleDef } from '../../lib/types/paper';
 import { cn } from '../../lib/utils/cn';
 
 export interface PaperStyleCardProps {
