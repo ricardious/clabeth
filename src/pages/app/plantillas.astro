@@ -1,0 +1,44 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import TemplateCard from '../../components/molecules/TemplateCard.astro';
+import { DOCUMENT_TEMPLATES } from '../../lib/templates-data';
+import '../../styles/fonts-handwriting.css';
+---
+
+<AppLayout title="Plantillas">
+  <div class="p-6">
+    <header class="mb-6">
+      <h2 class="font-display text-xl font-semibold text-foreground-strong">Plantillas</h2>
+      <p class="mt-1 max-w-2xl text-sm text-muted">
+        Empieza desde contenido realista con Markdown y LaTeX. Cada plantilla trae su propio
+        estilo de escritura y tipo de papel, que puedes cambiar luego en el editor.
+      </p>
+    </header>
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
+      {DOCUMENT_TEMPLATES.map((template) => <TemplateCard template={template} />)}
+    </div>
+  </div>
+
+  <script>
+    import { createDocument } from '../../lib/defaults';
+    import { loadLibrary, saveLibrary } from '../../lib/storage/repository';
+    import { DOCUMENT_TEMPLATES } from '../../lib/templates-data';
+
+    window.document.querySelectorAll<HTMLButtonElement>('.template-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const template = DOCUMENT_TEMPLATES.find((item) => item.id === card.dataset.templateId);
+        if (!template) return;
+
+        const document = createDocument({
+          title: template.name,
+          content: template.content,
+          presetId: template.presetId,
+          paperStyle: template.paperStyle,
+        });
+        const result = loadLibrary();
+        saveLibrary([document, ...result.documents]);
+        window.location.assign(`/app/editor?id=${document.id}`);
+      });
+    });
+  </script>
+</AppLayout>
