@@ -1,4 +1,4 @@
-import type { ExportOptions } from '../../types/export';
+import type { ExportOptions } from '../types/export';
 
 /** Resuelve qué páginas (índices 0-based) entran en la exportación. */
 export function resolvePageIndices(
