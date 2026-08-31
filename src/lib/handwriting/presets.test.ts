@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { needsWordSpans, wordVariation } from './jitter';
 import { seededJitter } from '../utils/seeded-random';
 import { HANDWRITING_PRESETS, DEFAULT_HANDWRITING } from './presets';
-import { HANDWRITING_FONTS } from './fonts';
+import { getHandwritingFont, HANDWRITING_FONTS } from './fonts';
 import { INK_COLORS } from './inks';
 
 describe('jitter', () => {
@@ -24,7 +24,22 @@ describe('jitter', () => {
   });
 
   it('con amplitud cero devuelve variación nula', () => {
-    expect(wordVariation('x', 3, 0, 0)).toEqual({ dy: 0, rot: 0 });
+    const variation = wordVariation('x', 3, 0, 0);
+    expect(variation.dy).toBe(0);
+    expect(variation.rot).toBe(0);
+    expect(variation.scaleX).toBe(1);
+  });
+
+  it('mantiene presión, escala y sangrado dentro de límites naturales', () => {
+    for (let i = 0; i < 200; i += 1) {
+      const variation = wordVariation('papel-real', i, 3, 2);
+      expect(variation.scaleX).toBeGreaterThanOrEqual(0.98);
+      expect(variation.scaleX).toBeLessThanOrEqual(1.02);
+      expect(variation.pressure).toBeGreaterThanOrEqual(0.94);
+      expect(variation.pressure).toBeLessThanOrEqual(1);
+      expect(Math.abs(variation.bleedX)).toBeLessThanOrEqual(0.16);
+      expect(Math.abs(variation.bleedY)).toBeLessThanOrEqual(0.12);
+    }
   });
 
   it('seededJitter devuelve valores en [-1, 1]', () => {
@@ -73,6 +88,12 @@ describe('presets y catálogos', () => {
     for (const preset of HANDWRITING_PRESETS) {
       expect(fontIds.has(preset.config.fontId)).toBe(true);
     }
+  });
+
+  it('los IDs antiguos con cobertura incompleta migran a fuentes con español', () => {
+    expect(getHandwritingFont('hw-1').id).toBe('patrick');
+    expect(getHandwritingFont('hw-2').id).toBe('gochi');
+    expect(getHandwritingFont('hw-6').id).toBe('playwrite-es');
   });
 
   it('toda tinta referenciada existe en el catálogo', () => {
