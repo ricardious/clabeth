@@ -13,22 +13,22 @@ texto plano, personaliza papel, letra y tinta, y exporta a PDF o PNG.
 ## Puesta en marcha
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-Abre <http://localhost:5173>. La portada incluye una demo funcional; «Entrar
-como invitado» crea un documento de bienvenida.
+Abre <http://localhost:4321>. La portada incluye una demo funcional;
+«Empezar a escribir» crea un documento de bienvenida.
 
 ## Comandos
 
 | Comando             | Acción                                    |
 | ------------------- | ----------------------------------------- |
-| `npm run dev`       | Servidor de desarrollo                    |
-| `npm run typecheck` | `tsc --noEmit` (TypeScript estricto)      |
-| `npm run test`      | Vitest + React Testing Library            |
-| `npm run build`     | typecheck + build de producción (`dist/`) |
-| `npm run preview`   | Sirve el build localmente                 |
+| `pnpm dev`       | Servidor de desarrollo                    |
+| `pnpm typecheck` | `astro check` (Astro + TypeScript)        |
+| `pnpm test`      | Vitest + React Testing Library            |
+| `pnpm build`     | typecheck + build de producción (`dist/`) |
+| `pnpm preview`   | Sirve el build localmente                 |
 
 ## Funcionalidades
 
@@ -58,22 +58,28 @@ como invitado» crea un documento de bienvenida.
 
 ```
 src/
-├── lib/            lógica de dominio (markdown, latex, handwriting,
-│                   pagination, paper, export, storage, templates)
-├── store/          Zustand: documentos, ajustes, UI
+├── pages/          rutas Astro estáticas y páginas de la aplicación
+├── layouts/        documento base y shell Astro de la aplicación
+├── lib/            dominio e infraestructura compartida
+│   ├── types/      tipos de documentos, papel, escritura, tema y exportación
+│   ├── store/      Zustand: documentos, ajustes y UI
+│   └── …           markdown, latex, handwriting, pagination, export, storage
 ├── hooks/          autosave, historial, búsqueda, paginación, atajos, tema
 ├── components/
 │   ├── atoms/      botones, inputs, sliders, diálogo, logo…
 │   ├── molecules/  tarjetas, estados, navegación de páginas…
 │   ├── organisms/  editor, preview paginada, paneles, exportación…
-│   └── templates/  AppShell y EditorShell (layout)
-├── pages/          Landing, Documentos, Editor, Plantillas, Ajustes,
-│                   Guías Markdown/LaTeX, 404
+│   └── templates/  layouts internos de las islas interactivas
 └── styles/         tokens OKLCH, papel, base, puente @theme de Tailwind v4
 ```
 
 ## Notas técnicas
 
+- Astro genera el enrutado, la portada, demo, biblioteca, plantillas, ajustes,
+  guías y layouts como HTML. React se hidrata solamente en el editor, donde
+  existe estado interactivo continuo, refs DOM y paneles sincronizados.
+- Solo la ruta del editor carga la isla React; las dependencias de exportación no
+  forman parte del JavaScript inicial de la portada o las guías.
 - Todo el sistema visual usa variables semánticas OKLCH (claro/oscuro/sistema)
   definidas en `src/styles/tokens.css` y expuestas por Tailwind v4.
 - El paginador mide bloques reales en un contenedor oculto y reparte por
