@@ -1,0 +1,226 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { Download, Monitor, Moon, Sun, Trash2, Upload } from '@lucide/astro';
+import Kbd from '../../components/atoms/Kbd.astro';
+import { HANDWRITING_PRESETS } from '../../lib/handwriting/presets';
+import { PAGE_SIZES, PAPER_STYLES } from '../../lib/paper/styles';
+
+const themes = [
+  { id: 'light', label: 'Claro', description: 'Papel y tinta de día.', icon: Sun },
+  { id: 'dark', label: 'Oscuro', description: 'Escritorio de noche, hoja clara.', icon: Moon },
+  { id: 'system', label: 'Sistema', description: 'Sigue la configuración del sistema.', icon: Monitor },
+] as const;
+
+const shortcuts = [
+  { combo: 'Ctrl+B', action: 'Negrita' },
+  { combo: 'Ctrl+I', action: 'Cursiva' },
+  { combo: 'Ctrl+K', action: 'Insertar enlace' },
+  { combo: 'Ctrl+F', action: 'Buscar en el documento' },
+  { combo: 'Ctrl+S', action: 'Guardar ahora' },
+  { combo: 'Ctrl+E', action: 'Alternar panel de personalización' },
+  { combo: 'Ctrl+Z', action: 'Deshacer' },
+  { combo: 'Ctrl+Y', action: 'Rehacer' },
+];
+---
+
+<AppLayout title="Ajustes">
+  <div class="mx-auto max-w-2xl p-6">
+    <header class="mb-6">
+      <h2 class="font-display text-xl font-semibold text-foreground-strong">Ajustes</h2>
+      <p class="mt-1 text-sm text-muted">Preferencias locales: se guardan en este navegador.</p>
+    </header>
+
+    <section aria-labelledby="h-tema" class="space-y-3">
+      <h3 id="h-tema" class="text-sm font-semibold text-foreground">Apariencia</h3>
+      <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Tema de la interfaz">
+        {themes.map(({ id, label, description, icon: Icon }) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked="false"
+            data-theme-choice={id}
+            class="theme-choice flex flex-col items-start gap-1.5 rounded-md border border-outline bg-surface p-3 text-left transition-colors duration-[var(--dur-fast)] hover:border-outline-strong"
+          >
+            <span class="flex items-center gap-1.5 text-sm font-medium text-foreground"><Icon size={18} aria-hidden="true" />{label}</span>
+            <span class="text-xs text-muted">{description}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <hr class="my-6 border-0 border-t border-outline" />
+
+    <section aria-labelledby="h-nuevos" class="space-y-3">
+      <h3 id="h-nuevos" class="text-sm font-semibold text-foreground">Documentos nuevos</h3>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <label class="block">
+          <span class="mb-1 block text-[13px] text-foreground">Estilo de escritura</span>
+          <select data-setting="defaultPresetId" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+            {HANDWRITING_PRESETS.map((preset) => <option value={preset.id}>{preset.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="mb-1 block text-[13px] text-foreground">Papel por defecto</span>
+          <select data-setting="defaultPaperStyle" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+            {PAPER_STYLES.map((style) => <option value={style.id}>{style.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="mb-1 block text-[13px] text-foreground">Tamaño por defecto</span>
+          <select data-setting="defaultPageSize" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+            {Object.entries(PAGE_SIZES).map(([id, definition]) => <option value={id}>{definition.name}</option>)}
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <hr class="my-6 border-0 border-t border-outline" />
+
+    <section aria-labelledby="h-biblioteca" class="space-y-3">
+      <h3 id="h-biblioteca" class="text-sm font-semibold text-foreground">Biblioteca</h3>
+      <div class="flex flex-wrap gap-2">
+        <button id="export-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-panel">
+          <Download size={15} aria-hidden="true" /> Exportar copia (JSON)
+        </button>
+        <button id="import-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-panel">
+          <Upload size={15} aria-hidden="true" /> Importar copia
+        </button>
+        <button id="clear-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-error px-3 text-sm font-medium text-error hover:bg-primary-soft">
+          <Trash2 size={15} aria-hidden="true" /> Borrar todos los documentos
+        </button>
+      </div>
+      <input id="library-file" type="file" accept=".json" class="hidden" />
+      <p id="library-message" role="status" class="hidden text-sm"></p>
+    </section>
+
+    <hr class="my-6 border-0 border-t border-outline" />
+
+    <section aria-labelledby="h-atajos">
+      <h3 id="h-atajos" class="mb-3 text-sm font-semibold text-foreground">Atajos de teclado</h3>
+      <ul class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+        {shortcuts.map((shortcut) => (
+          <li class="flex items-center justify-between text-sm text-foreground">
+            <span>{shortcut.action}</span>
+            <span class="flex gap-1">{shortcut.combo.split('+').map((part) => <Kbd>{part}</Kbd>)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+
+  <dialog id="clear-dialog" aria-labelledby="clear-title" class="m-auto w-[min(420px,92vw)] rounded-lg border border-outline bg-surface p-0 text-foreground shadow-pop">
+    <div class="p-5">
+      <h2 id="clear-title" class="font-display text-lg font-semibold text-foreground-strong">Borrar todos los documentos</h2>
+      <p class="mt-2 text-sm text-muted">Se eliminarán todos los documentos de este navegador. Esta acción no se puede deshacer.</p>
+      <div class="mt-5 flex justify-end gap-2">
+        <button id="cancel-clear" type="button" class="h-[var(--control-h-md)] rounded-md px-3 text-sm text-muted hover:bg-panel">Cancelar</button>
+        <button id="confirm-clear" type="button" class="h-[var(--control-h-md)] rounded-md bg-error px-3 text-sm font-medium text-primary-foreground">Borrar todo</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    import type { PageSizeId, PaperStyleId } from '../../lib/types/paper';
+    import type { ThemeMode } from '../../lib/types/theme';
+    import { exportLibraryJson, importLibraryJson, loadLibrary, saveLibrary } from '../../lib/storage/repository';
+
+    const settingsKey = 'clabeth.settings.v1';
+    interface StoredSettings {
+      theme: ThemeMode;
+      defaultPresetId: string;
+      defaultPaperStyle: PaperStyleId;
+      defaultPageSize: PageSizeId;
+    }
+    const defaults: StoredSettings = { theme: 'light', defaultPresetId: 'clara', defaultPaperStyle: 'libreta', defaultPageSize: 'a4' };
+
+    function readSettings(): StoredSettings {
+      try {
+        const stored = JSON.parse(localStorage.getItem(settingsKey) ?? '{}') as { state?: Partial<StoredSettings> };
+        return { ...defaults, ...stored.state };
+      } catch {
+        return { ...defaults };
+      }
+    }
+
+    function writeSettings(settings: StoredSettings): void {
+      localStorage.setItem(settingsKey, JSON.stringify({ state: settings, version: 1 }));
+    }
+
+    function renderSettings(settings: StoredSettings): void {
+      window.document.querySelectorAll<HTMLButtonElement>('.theme-choice').forEach((choice) => {
+        const selected = choice.dataset.themeChoice === settings.theme;
+        choice.setAttribute('aria-checked', String(selected));
+        choice.classList.toggle('border-focus-ring', selected);
+        choice.classList.toggle('bg-primary-soft/40', selected);
+        choice.classList.toggle('border-outline', !selected);
+        choice.classList.toggle('bg-surface', !selected);
+      });
+      window.document.querySelectorAll<HTMLSelectElement>('[data-setting]').forEach((select) => {
+        const key = select.dataset.setting as keyof StoredSettings;
+        select.value = settings[key];
+      });
+    }
+
+    let settings = readSettings();
+    renderSettings(settings);
+    window.document.querySelectorAll<HTMLButtonElement>('.theme-choice').forEach((choice) => {
+      choice.addEventListener('click', () => {
+        settings = { ...settings, theme: choice.dataset.themeChoice as ThemeMode };
+        writeSettings(settings);
+        if (settings.theme === 'system') window.document.documentElement.removeAttribute('data-theme');
+        else window.document.documentElement.dataset.theme = settings.theme;
+        renderSettings(settings);
+      });
+    });
+    window.document.querySelectorAll<HTMLSelectElement>('[data-setting]').forEach((select) => {
+      select.addEventListener('change', () => {
+        settings = { ...settings, [select.dataset.setting as string]: select.value };
+        writeSettings(settings);
+      });
+    });
+
+    const message = window.document.querySelector<HTMLElement>('#library-message');
+    function showMessage(text: string, error = false): void {
+      if (!message) return;
+      message.textContent = text;
+      message.classList.remove('hidden', 'text-success', 'text-error');
+      message.classList.add(error ? 'text-error' : 'text-success');
+    }
+
+    window.document.querySelector<HTMLButtonElement>('#export-library')?.addEventListener('click', () => {
+      const blob = new Blob([exportLibraryJson(loadLibrary().documents)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = window.document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'clabeth-biblioteca.json';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+    const fileInput = window.document.querySelector<HTMLInputElement>('#library-file');
+    window.document.querySelector<HTMLButtonElement>('#import-library')?.addEventListener('click', () => fileInput?.click());
+    fileInput?.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      try {
+        const incoming = importLibraryJson(await file.text());
+        const current = loadLibrary().documents;
+        const existing = new Set(current.map((document) => document.id));
+        const fresh = incoming.filter((document) => !existing.has(document.id));
+        saveLibrary([...fresh, ...current]);
+        showMessage(`Importados ${fresh.length} documento${fresh.length === 1 ? '' : 's'}.`);
+      } catch (error) {
+        showMessage(error instanceof Error ? error.message : 'No se pudo importar la copia.', true);
+      }
+      fileInput.value = '';
+    });
+
+    const dialog = window.document.querySelector<HTMLDialogElement>('#clear-dialog');
+    window.document.querySelector<HTMLButtonElement>('#clear-library')?.addEventListener('click', () => dialog?.showModal());
+    window.document.querySelector<HTMLButtonElement>('#cancel-clear')?.addEventListener('click', () => dialog?.close());
+    window.document.querySelector<HTMLButtonElement>('#confirm-clear')?.addEventListener('click', () => {
+      saveLibrary([]);
+      dialog?.close();
+      showMessage('Se borraron todos los documentos.');
+    });
+  </script>
+</AppLayout>
