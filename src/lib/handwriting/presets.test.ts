@@ -93,7 +93,11 @@ describe('presets y catálogos', () => {
   it('los IDs antiguos con cobertura incompleta migran a fuentes con español', () => {
     expect(getHandwritingFont('hw-1').id).toBe('patrick');
     expect(getHandwritingFont('hw-2').id).toBe('gochi');
+    expect(getHandwritingFont('hw-5').id).toBe('gochi');
     expect(getHandwritingFont('hw-6').id).toBe('playwrite-es');
+    expect(getHandwritingFont('hw-8').id).toBe('patrick');
+    expect(getHandwritingFont('hw-9').id).toBe('caveat');
+    expect(getHandwritingFont('labelle').id).toBe('playwrite-es');
   });
 
   it('toda tinta referenciada existe en el catálogo', () => {
