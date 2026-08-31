@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { ClabethDocument, SaveState } from '../types/document';
-import { createDocument } from '../lib/defaults';
-import { loadLibrary, saveLibrary } from '../lib/storage/repository';
+import { createDocument } from '../defaults';
+import { loadLibrary, saveLibrary } from '../storage/repository';
 import { useSettingsStore } from './settings';
 
 interface DocumentsState {
