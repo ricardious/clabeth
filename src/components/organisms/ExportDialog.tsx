@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
-import type { ExportFormat, ExportOptions, ExportRange } from '../../types/export';
+import type { ExportFormat, ExportOptions, ExportProgress, ExportRange } from '../../lib/types/export';
 import { Button } from '../atoms/Button';
 import { Dialog } from '../atoms/Dialog';
 import { Input } from '../atoms/Input';
 import { Select } from '../atoms/Select';
 import { Switch } from '../atoms/Switch';
 import { Separator } from '../atoms/Separator';
-import { Spinner } from '../atoms/Spinner';
 import { ErrorNotice } from '../molecules/ErrorNotice';
+import { RenderingStatus } from '../molecules/RenderingStatus';
 import { cn } from '../../lib/utils/cn';
 
 export interface ExportDialogProps {
   open: boolean;
   busy: boolean;
+  progress: ExportProgress | null;
   error: string | null;
   totalPages: number;
   currentPage: number;
@@ -37,7 +38,7 @@ function OptionButton({ active, label, onClick }: { active: boolean; label: stri
   );
 }
 
-export function ExportDialog({ open, busy, error, totalPages, currentPage, onClose, onExport }: ExportDialogProps) {
+export function ExportDialog({ open, busy, progress, error, totalPages, currentPage, onClose, onExport }: ExportDialogProps) {
   const [format, setFormat] = useState<ExportFormat>('pdf');
   const [range, setRange] = useState<ExportRange>('todas');
   const [rangeFrom, setRangeFrom] = useState(1);
@@ -65,8 +66,23 @@ export function ExportDialog({ open, busy, error, totalPages, currentPage, onClo
     });
   };
 
+  const progressDescription =
+    progress?.phase === 'rendering' && progress.total > 0
+      ? `Renderizando hoja ${progress.current} de ${progress.total}.`
+      : progress?.phase === 'finishing'
+        ? `Armando el archivo ${format.toUpperCase()} y preparando la descarga.`
+        : 'Calculando páginas, márgenes y tipografía manuscrita.';
+
   return (
     <Dialog open={open} onClose={busy ? () => undefined : onClose} title="Exportar documento">
+      {busy ? (
+        <RenderingStatus
+          variant="dialog"
+          title={`Preparando tu ${format.toUpperCase()}`}
+          description={progressDescription}
+          detail="Mantén esta pestaña abierta. La descarga comenzará automáticamente."
+        />
+      ) : (
       <div className="p-5">
         <h2 className="font-display text-lg font-semibold text-foreground-strong">Exportar documento</h2>
 
@@ -145,19 +161,11 @@ export function ExportDialog({ open, busy, error, totalPages, currentPage, onClo
             Cancelar
           </Button>
           <Button onClick={handleExport} disabled={busy || rangeInvalid || totalPages === 0}>
-            {busy ? (
-              <>
-                <Spinner className="h-3.5 w-3.5 border-primary-foreground/40 border-t-primary-foreground" label="Generando" />
-                Generando…
-              </>
-            ) : (
-              <>
-                <Download size={15} aria-hidden /> Exportar
-              </>
-            )}
+            <Download size={15} aria-hidden /> Exportar
           </Button>
         </div>
       </div>
+      )}
     </Dialog>
   );
 }
