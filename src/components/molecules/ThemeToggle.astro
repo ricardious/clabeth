@@ -1,0 +1,63 @@
+---
+import { Monitor, Moon, Sun } from '@lucide/astro';
+---
+
+<button
+  type="button"
+  class="theme-toggle inline-flex size-[var(--control-h-md)] items-center justify-center rounded-md text-muted transition-colors hover:bg-panel hover:text-foreground"
+  aria-label="Cambiar tema"
+>
+  <span data-theme-icon="light"><Sun size={17} aria-hidden="true" /></span>
+  <span data-theme-icon="dark" hidden><Moon size={17} aria-hidden="true" /></span>
+  <span data-theme-icon="system" hidden><Monitor size={17} aria-hidden="true" /></span>
+</button>
+
+<script>
+  const settingsKey = 'clabeth.settings.v1';
+  const themes = ['light', 'dark', 'system'] as const;
+
+  function readTheme(): (typeof themes)[number] {
+    try {
+      const stored = JSON.parse(localStorage.getItem(settingsKey) ?? '{}') as { state?: { theme?: string } };
+      return themes.includes(stored.state?.theme as (typeof themes)[number])
+        ? (stored.state?.theme as (typeof themes)[number])
+        : 'light';
+    } catch {
+      return 'light';
+    }
+  }
+
+  function applyTheme(theme: (typeof themes)[number]): void {
+    if (theme === 'system') window.document.documentElement.removeAttribute('data-theme');
+    else window.document.documentElement.dataset.theme = theme;
+
+    window.document.querySelectorAll<HTMLButtonElement>('.theme-toggle').forEach((button) => {
+      button.querySelectorAll<HTMLElement>('[data-theme-icon]').forEach((icon) => {
+        icon.hidden = icon.dataset.themeIcon !== theme;
+      });
+      button.setAttribute('aria-label', `Tema ${theme}; cambiar tema`);
+    });
+  }
+
+  window.document.querySelectorAll<HTMLButtonElement>('.theme-toggle').forEach((button) => {
+    if (button.dataset.ready === 'true') return;
+    button.dataset.ready = 'true';
+    button.addEventListener('click', () => {
+      const current = readTheme();
+      const next = themes[(themes.indexOf(current) + 1) % themes.length] ?? 'light';
+      let stored: { state?: Record<string, unknown>; version?: number } = {};
+      try {
+        stored = JSON.parse(localStorage.getItem(settingsKey) ?? '{}') as typeof stored;
+      } catch {
+        stored = {};
+      }
+      localStorage.setItem(settingsKey, JSON.stringify({
+        ...stored,
+        state: { ...stored.state, theme: next },
+        version: 1,
+      }));
+      applyTheme(next);
+    });
+  });
+  applyTheme(readTheme());
+</script>

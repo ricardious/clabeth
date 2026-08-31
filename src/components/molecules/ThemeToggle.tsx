@@ -1,7 +1,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore } from '../../lib/store/settings';
 import { IconButton } from '../atoms/IconButton';
-import type { ThemeMode } from '../../types/theme';
+import type { ThemeMode } from '../../lib/types/theme';
 
 const NEXT: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
 const LABELS: Record<ThemeMode, string> = {
