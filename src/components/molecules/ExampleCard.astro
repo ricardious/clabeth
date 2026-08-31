@@ -1,0 +1,36 @@
+---
+import { DEFAULT_HANDWRITING } from '../../lib/handwriting/presets';
+import { handCssVars } from '../../lib/handwriting/css-vars';
+import { renderMarkdown } from '../../lib/markdown/render';
+
+interface Props {
+  title: string;
+  source: string;
+  class?: string;
+}
+
+const { title, source, class: className = '' } = Astro.props;
+const guideHand = { ...DEFAULT_HANDWRITING, fontSize: 19 };
+const rendered = await renderMarkdown(source, `guia-${title}`, guideHand);
+const variables = handCssVars(guideHand);
+const style = [
+  ...Object.entries(variables).map(([name, value]) => `${name}:${value}`),
+  `--_line-h:${guideHand.fontSize * guideHand.lineHeight}px`,
+  '--_line-offset:16px',
+].join(';');
+---
+
+<section aria-label={title} class:list={['rounded-lg border border-outline bg-surface shadow-panel', className]}>
+  <h3 class="border-b border-outline px-4 py-2.5 font-display text-[15px] font-semibold text-foreground-strong">
+    {title}
+  </h3>
+  <div class="grid grid-cols-1 gap-0 lg:grid-cols-2">
+    <pre class="overflow-x-auto border-b border-outline bg-panel p-4 font-mono text-[12.5px] leading-relaxed text-foreground lg:border-b-0 lg:border-r">{source}</pre>
+    <div
+      aria-label="Resultado manuscrito"
+      class="paper-bg paper-libreta hand-scope min-h-[120px] p-4"
+      style={style}
+      set:html={rendered}
+    ></div>
+  </div>
+</section>
