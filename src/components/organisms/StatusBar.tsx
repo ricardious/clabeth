@@ -1,4 +1,4 @@
-import type { SaveState } from '../../types/document';
+import type { SaveState } from '../../lib/types/document';
 import { formatNumber } from '../../lib/utils/format';
 import { SaveStatus } from '../molecules/SaveStatus';
 
