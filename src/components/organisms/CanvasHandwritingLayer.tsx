@@ -38,6 +38,17 @@ export function CanvasHandwritingLayer({
 }: CanvasHandwritingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // El aviso de estado no describe *qué* dibujar, así que no puede estar entre
+  // las dependencias del efecto: una identidad nueva (un callback en línea del
+  // padre, por ejemplo al cambiar de pestaña del inspector) provocaba un
+  // repintado completo de la hoja sin que el documento hubiera cambiado.
+  // La ref se actualiza antes que el efecto de dibujado porque se declara antes.
+  const notifyRef = useRef(onRenderStateChange);
+  useLayoutEffect(() => {
+    notifyRef.current = onRenderStateChange;
+  });
+  const notify = (state: CanvasRenderState): void => notifyRef.current?.(state);
+
   useLayoutEffect(() => {
     let disposed = false;
     let frame = 0;
@@ -47,7 +58,7 @@ export function CanvasHandwritingLayer({
     const source = sourceRef.current ?? page?.querySelector<HTMLDivElement>('.canvas-handwriting-source') ?? null;
     if (!page || !source || !canvas) return;
     canvas.dataset.renderState = 'scheduled';
-    onRenderStateChange?.('scheduled');
+    notify('scheduled');
 
     const draw = async (): Promise<void> => {
       await window.document.fonts.ready;
@@ -56,7 +67,7 @@ export function CanvasHandwritingLayer({
         void (async () => {
           try {
             canvas.dataset.renderState = 'rendering';
-            onRenderStateChange?.('rendering');
+            notify('rendering');
             const pageStyle = window.getComputedStyle(page);
             const glyphs = collectPositionedGlyphs(source, page);
             const metrics = await renderHandwritingCanvas(canvas, {
@@ -85,7 +96,7 @@ export function CanvasHandwritingLayer({
               canvas.dataset.glyphCount = String(metrics.glyphCount);
               delete canvas.dataset.renderError;
               page.classList.add('canvas-handwriting-ready');
-              onRenderStateChange?.('ready');
+              notify('ready');
             }
           } catch (error) {
             // El DOM sigue visible como fallback si Canvas o la textura fallan.
@@ -93,7 +104,7 @@ export function CanvasHandwritingLayer({
               canvas.dataset.renderState = 'error';
               canvas.dataset.renderError = error instanceof Error ? error.message : 'Error de render desconocido';
               page.classList.remove('canvas-handwriting-ready');
-              onRenderStateChange?.('error');
+              notify('error');
             }
           }
         })();
@@ -116,7 +127,10 @@ export function CanvasHandwritingLayer({
       window.cancelAnimationFrame(frame);
       page.classList.remove('canvas-handwriting-ready');
     };
-  }, [height, handwriting, onRenderStateChange, pageRef, paper, renderKey, seed, sourceRef, width]);
+    // `notify` se lee desde una ref a propósito: avisar del estado no debe
+    // disparar un redibujado.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [height, handwriting, pageRef, paper, renderKey, seed, sourceRef, width]);
 
   return <canvas ref={canvasRef} className="handwriting-canvas" aria-hidden="true" />;
 }
