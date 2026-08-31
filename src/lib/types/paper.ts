@@ -1,3 +1,4 @@
+/** Tipos de dominio del papel y sus dimensiones. */
 export type PaperStyleId =
   | 'blanca'
   | 'rayada'
