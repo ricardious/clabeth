@@ -1,27 +1,30 @@
 # Clabeth
 
 Aplicación que convierte Markdown y fórmulas LaTeX en documentos con apariencia
-de escritura manuscrita. React + TypeScript + Vite + Tailwind CSS v4.
+de escritura manuscrita. Astro + React islands + TypeScript + Tailwind CSS v4.
 
 ## Comandos
 
 ```sh
-npm install         # instalar dependencias
-npm run dev         # servidor de desarrollo (http://localhost:5173)
-npm run typecheck   # tsc --noEmit (TypeScript estricto)
-npm run test        # Vitest + React Testing Library
-npm run test:watch  # Vitest en modo watch
-npm run build       # typecheck + build de producción (dist/)
-npm run preview     # servir el build localmente
+pnpm install        # instalar dependencias
+pnpm dev            # servidor de desarrollo (http://localhost:4321)
+pnpm typecheck      # astro check (Astro + TypeScript estricto)
+pnpm test           # Vitest + React Testing Library
+pnpm test:watch     # Vitest en modo watch
+pnpm build          # typecheck + build de producción (dist/)
+pnpm preview        # servir el build localmente
 ```
 
 ## Arquitectura
 
-- `src/lib/` — lógica de dominio pura y testeable (markdown, latex, jitter,
-  paginación, papel, exportación, storage, plantillas). Sin React.
-- `src/store/` — estado global con Zustand (documentos, ajustes, UI).
+- `src/lib/` — dominio e infraestructura compartida: lógica pura y testeable
+  (markdown, latex, jitter, paginación, papel, exportación, storage,
+  plantillas), tipos en `lib/types/` y estado Zustand en `lib/store/`.
+- `src/pages/` y `src/layouts/` — rutas y estructura HTML de Astro. Deben ser
+  estáticas por defecto; hidratar únicamente la interacción necesaria.
 - `src/components/` — Atomic Design: `atoms` → `molecules` → `organisms` →
-  `templates`. Las páginas viven en `src/pages/`.
+  `templates`. Dentro de cada nivel, `.astro` es el formato predeterminado;
+  `.tsx` se usa únicamente cuando el componente necesita estado React.
 - `src/styles/` — sistema de tokens: `tokens.css` (variables semánticas
   OKLCH, claro/oscuro/sistema), `paper.css` (fondos de hoja y escritura),
   `base.css`. Tailwind v4 los expone como utilidades vía `@theme inline`.
@@ -44,3 +47,6 @@ npm run preview     # servir el build localmente
   heredadas (`--formula-slant`, limitada a ±3°) y modos
   manuscrita / sutil / tipográfica (`HandwritingConfig.formulaStyle`).
   Documentos antiguos sin el campo caen a `manuscrita` (`?? 'manuscrita'`).
+- No convertir una página completa en SPA: Astro controla el enrutado y React
+  se reserva para el espacio de trabajo del editor (`client:only="react"`),
+  que necesita estado sincronizado, refs DOM y renderizado interactivo continuo.
