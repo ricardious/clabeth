@@ -1,5 +1,5 @@
 import type { Element, ElementContent, Root } from 'hast';
-import { needsWordSpans, wordVariation } from '../handwriting/jitter';
+import { wordVariation } from '../handwriting/jitter';
 
 export interface RehypeJitterOptions {
   /** Semilla por documento: la misma entrada siempre produce la misma hoja. */
@@ -22,7 +22,7 @@ function isSkipped(element: Element): boolean {
 }
 
 /**
- * Envuelve cada palabra en un span .jw con variación determinista.
+ * Envuelve cada palabra en un span .jw con variación determinista y continua.
  * Las fórmulas KaTeX y el código quedan intactos para conservar precisión.
  * Recorre el árbol construyendo un array nuevo por elemento (sin mutar
  * mientras se itera), lo que evita los problemas de unist-util-visit.
@@ -31,7 +31,6 @@ export function rehypeJitter(options: RehypeJitterOptions) {
   const { seed, jitterY, jitterRot, slant } = options;
 
   return (tree: Root): void => {
-    if (!needsWordSpans(jitterY, jitterRot, slant)) return;
     let wordIndex = 0;
 
     const processElement = (element: Element): void => {
@@ -58,7 +57,15 @@ export function rehypeJitter(options: RehypeJitterOptions) {
               tagName: 'span',
               properties: {
                 className: ['jw'],
-                style: `--jy:${variation.dy}px;--jr:${variation.rot}deg;--js:${slant}deg`,
+                style: [
+                  `--jy:${variation.dy}px`,
+                  `--jr:${variation.rot}deg`,
+                  `--js:${slant}deg`,
+                  `--jx:${variation.scaleX}`,
+                  `--jp:${variation.pressure}`,
+                  `--jbx:${variation.bleedX}px`,
+                  `--jby:${variation.bleedY}px`,
+                ].join(';'),
               },
               children: [{ type: 'text', value: part }],
             });
