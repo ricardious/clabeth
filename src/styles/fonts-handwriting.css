@@ -1,0 +1,64 @@
+@import '@fontsource/caveat/latin-400.css';
+@import '@fontsource/caveat/latin-500.css';
+@import '@fontsource/caveat/latin-600.css';
+@import '@fontsource/caveat/latin-700.css';
+@import '@fontsource/kalam/latin-300.css';
+@import '@fontsource/kalam/latin-400.css';
+@import '@fontsource/kalam/latin-700.css';
+@import '@fontsource/shadows-into-light/latin-400.css';
+@import '@fontsource/la-belle-aurore/latin-400.css';
+@import '@fontsource/architects-daughter/latin-400.css';
+@import '@fontsource/gochi-hand/latin-400.css';
+@import '@fontsource/patrick-hand/latin-400.css';
+@import '@fontsource-variable/playwrite-es/wght.css';
+
+/* Letras locales con cobertura Latin-1 completa. HW-1 y HW-2 no incluían
+   vocales acentuadas; HW-6 se retiró porque sus tildes se separaban demasiado
+   del glifo base y no daban un resultado fiable en español. */
+@font-face {
+  font-family: 'HW-3';
+  src: url('/fonts/handwriting/Handwriting-3.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW-4';
+  src: url('/fonts/handwriting/Handwriting-4.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW-5';
+  src: url('/fonts/handwriting/Handwriting-5.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW-7';
+  src: url('/fonts/handwriting/Handwriting-7.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW-8';
+  src: url('/fonts/handwriting/Handwriting-8.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW-9';
+  src: url('/fonts/handwriting/Handwriting-9.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
