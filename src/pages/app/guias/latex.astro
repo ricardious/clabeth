@@ -1,0 +1,57 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { Copy } from '@lucide/astro';
+import katex from 'katex';
+import { LATEX_CATEGORIES, LATEX_SNIPPETS } from '../../../lib/latex/snippets';
+import '../../../styles/fonts-handwriting.css';
+import 'katex/dist/katex.min.css';
+---
+
+<AppLayout title="Guía de LaTeX">
+  <div class="mx-auto max-w-5xl p-6">
+    <header class="mb-6">
+      <h2 class="font-display text-xl font-semibold text-foreground-strong">Guía de LaTeX</h2>
+      <p class="mt-1 max-w-2xl text-sm text-muted">El catálogo de fórmulas de Clabeth. Copia el código y úsalo en el panel de Fórmulas del editor.</p>
+    </header>
+    <div class="space-y-6">
+      {LATEX_CATEGORIES.map((category) => (
+        <section aria-label={category}>
+          <h3 class="mb-2 font-display text-[15px] font-semibold text-foreground-strong">{category}</h3>
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {LATEX_SNIPPETS.filter((snippet) => snippet.category === category).map((snippet) => (
+              <div class="flex items-center gap-2 rounded-lg border border-outline bg-surface p-3 shadow-panel transition-colors hover:border-outline-strong">
+                <div class="flex min-w-0 flex-1 items-center gap-3">
+                  <div class="w-14 shrink-0 text-center" set:html={katex.renderToString(snippet.latex, { throwOnError: false })}></div>
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-[13px] font-medium text-foreground">{snippet.label}</p>
+                    <p class="truncate font-mono text-[11.5px] text-muted">{snippet.latex}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="copy-latex inline-flex size-[var(--control-h-sm)] shrink-0 items-center justify-center rounded-md text-muted hover:bg-panel hover:text-foreground"
+                  aria-label={`Copiar ${snippet.latex}`}
+                  data-latex={snippet.latex}
+                ><Copy size={14} aria-hidden="true" /></button>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+    <p id="copy-status" class="sr-only" aria-live="polite"></p>
+  </div>
+
+  <script>
+    const status = window.document.querySelector<HTMLElement>('#copy-status');
+    window.document.querySelectorAll<HTMLButtonElement>('.copy-latex').forEach((button) => {
+      button.addEventListener('click', () => {
+        const latex = button.dataset.latex ?? '';
+        void navigator.clipboard?.writeText(latex);
+        button.setAttribute('aria-label', 'Copiado');
+        if (status) status.textContent = 'Fórmula copiada';
+        window.setTimeout(() => button.setAttribute('aria-label', `Copiar ${latex}`), 1600);
+      });
+    });
+  </script>
+</AppLayout>
