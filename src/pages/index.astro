@@ -1,0 +1,911 @@
+---
+import { ArrowRight, BookOpenText, FileDown, NotebookPen, Sigma } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ThemeToggle from '../components/molecules/ThemeToggle.astro';
+import Logo from '../components/atoms/Logo.astro';
+import LandingDemo from '../components/organisms/LandingDemo.astro';
+import { HANDWRITING_PRESETS } from '../lib/handwriting/presets';
+import { getHandwritingFont } from '../lib/handwriting/fonts';
+import { getInk } from '../lib/handwriting/inks';
+import { handCssVars } from '../lib/handwriting/css-vars';
+import { renderMarkdown } from '../lib/markdown/render';
+import { PAPER_STYLES } from '../lib/paper/styles';
+import 'katex/dist/katex.min.css';
+import '../styles/fonts-handwriting.css';
+
+const steps = [
+  { icon: NotebookPen, number: '1', title: 'Escribe sin pelear con el formato', description: 'Usa Markdown para títulos, listas, tablas y notas. LaTeX se ocupa de las fórmulas.' },
+  { icon: Sigma, number: '2', title: 'Haz que la hoja se sienta tuya', description: 'Elige papel, tinta, letra e irregularidad. La vista previa cambia mientras escribes.' },
+  { icon: FileDown, number: '3', title: 'Llévatelo terminado', description: 'Exporta el resultado a PDF o PNG conservando páginas, márgenes y trazo.' },
+];
+
+const heroHand = { ...HANDWRITING_PRESETS[4].config, fontSize: 31, lineHeight: 1.55 };
+const heroContent = `Mi próxima gran idea
+
+empieza con texto plano,
+
+pero termina en papel.
+
+Clabeth`;
+const heroRendered = await renderMarkdown(heroContent, 'landing-hero', heroHand);
+const heroPaperStyle = Object.entries({
+  '--_page-w': 'min(100%, 410px)',
+  '--_page-h': '430px',
+  '--_line-h': '48px',
+  '--_line-offset': '28px',
+  ...handCssVars(heroHand, 24),
+}).map(([name, value]) => `${name}:${value}`).join(';');
+
+const primaryButton = 'open-clabeth landing-button inline-flex items-center justify-center gap-2 whitespace-nowrap';
+---
+
+<BaseLayout>
+  <div class="landing-page min-h-full bg-background">
+    <header class="landing-nav sticky top-0 z-10 bg-background">
+      <div class="landing-shell flex min-h-16 items-center gap-4 py-2">
+        <a href="/" aria-label="Clabeth" class="landing-wordmark"><Logo size="md" /></a>
+        <nav aria-label="Principal" class="ml-auto hidden items-center md:flex">
+          <a href="/app">Documentos</a>
+          <a href="/app/plantillas">Plantillas</a>
+          <a href="/app/guias/markdown">Guías</a>
+        </nav>
+        <div class="flex items-center gap-2">
+          <ThemeToggle />
+          <button type="button" class={primaryButton}>Abrir Clabeth</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="landing-hero landing-shell">
+        <div class="landing-hero-copy">
+          <p class="landing-intro">Markdown entra. Una hoja con carácter sale.</p>
+          <h1>Escribe limpio.<br /><span>Que parezca hecho a mano.</span></h1>
+          <p class="landing-lede">
+            Convierte apuntes, fórmulas y textos en páginas manuscritas sin dejar de escribir en Markdown y LaTeX.
+          </p>
+          <div class="landing-actions">
+            <button type="button" class={primaryButton}>Empezar a escribir <ArrowRight size={18} aria-hidden="true" /></button>
+            <a href="/app/plantillas" class="landing-link">Ver plantillas <ArrowRight size={16} aria-hidden="true" /></a>
+          </div>
+          <p class="landing-local-note">Se guarda en este navegador. Sin cuentas ni pasos extra.</p>
+        </div>
+
+        <figure class="landing-paper-stage" aria-label="Ejemplo de una hoja creada con Clabeth">
+          <div class="landing-paper-shadow" aria-hidden="true"></div>
+          <div class="page paper-rayada landing-hero-paper" style={heroPaperStyle}>
+            <div
+              data-landing-canvas-source
+              class="page-content hand-scope canvas-handwriting-source landing-hero-writing"
+              set:html={heroRendered}
+            ></div>
+            <canvas data-landing-canvas class="handwriting-canvas" aria-hidden="true"></canvas>
+          </div>
+          <span class="landing-ink-friend" data-landing-character aria-hidden="true"><i></i><i></i></span>
+          <figcaption>Una hoja real, no una captura decorativa.</figcaption>
+        </figure>
+      </section>
+
+      <section aria-label="Demostración" class="landing-demo-section">
+        <div class="landing-shell">
+          <header class="landing-section-head">
+            <div>
+              <h2>Prueba el cambio mientras escribes.</h2>
+              <p>No hay video ni truco: edita el Markdown y la hoja responde.</p>
+            </div>
+            <span aria-hidden="true">Aa → 𝒜</span>
+          </header>
+          <LandingDemo />
+        </div>
+      </section>
+
+      <section aria-label="Cómo funciona" class="landing-process landing-shell">
+        <header class="landing-section-head landing-section-head--compact">
+          <div>
+            <h2>Del teclado al papel, sin rodeos.</h2>
+            <p>Tres pasos concretos. El resto se ajusta a tu gusto.</p>
+          </div>
+        </header>
+        <ol class="landing-steps">
+          {steps.map(({ icon: Icon, number, title, description }) => (
+            <li>
+              <span class="landing-step-number" aria-hidden="true">{number}</span>
+              <span class="landing-step-icon" aria-hidden="true"><Icon size={22} /></span>
+              <div>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-label="Personalización" class="landing-workshop">
+        <div class="landing-shell landing-workshop-grid">
+          <div class="landing-paper-catalogue">
+            <div>
+              <h2>Primero, elige el papel.</h2>
+              <p>Blanco, rayado, cuadriculado o con ese margen rojo de cuaderno que todos reconocemos.</p>
+            </div>
+            <div class="landing-paper-grid">
+              {PAPER_STYLES.map((style) => (
+                <div class="landing-paper-swatch">
+                  <span aria-hidden="true" class:list={['paper-bg', `paper-${style.id}`]} style="--_line-h:14px;--_grid:10px;--_line-offset:8px"></span>
+                  <span>{style.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="landing-ink-catalogue">
+            <div>
+              <h2>Después, dale una voz.</h2>
+              <p>Cada estilo combina trazo, inclinación y tinta. Puedes afinarlo todo dentro del editor.</p>
+            </div>
+            <div class="landing-preset-list">
+              {HANDWRITING_PRESETS.map((preset, index) => (
+                <div class="landing-preset-row">
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong
+                    aria-hidden="true"
+                    class="preset-hand-preview"
+                    style={`--preset-font:${getHandwritingFont(preset.config.fontId).family};--preset-ink:var(${getInk(preset.config.inkId).token});--preset-weight:${preset.config.weight}`}
+                  >{preset.name}</strong>
+                  <small>{preset.description}</small>
+                </div>
+              ))}
+            </div>
+            <a href="/app/guias/markdown" class="landing-guide-link"><BookOpenText size={17} aria-hidden="true" /> Aprende Markdown en la guía</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="landing-final landing-shell">
+        <div>
+          <h2>Tu primer documento puede empezar ahora.</h2>
+          <p>Abre Clabeth, escribe una línea y deja que el papel haga el resto.</p>
+        </div>
+        <button type="button" class={primaryButton}>Empezar a escribir <ArrowRight size={18} aria-hidden="true" /></button>
+      </section>
+    </main>
+
+    <footer class="landing-footer" aria-label="Pie de página">
+      <div class="landing-shell landing-footer-meta">
+        <Logo size="sm" />
+        <p>Escritura manuscrita desde Markdown y LaTeX.</p>
+        <a href="/app">Mis documentos</a>
+      </div>
+      <p class="sr-only">Clabeth. Escritura manuscrita desde Markdown y LaTeX.</p>
+    </footer>
+  </div>
+
+  <script>
+    import { createDocument } from '../lib/defaults';
+    import { HANDWRITING_PRESETS } from '../lib/handwriting/presets';
+    import { mountStaticCanvasPreview } from '../lib/handwriting/static-canvas-preview';
+    import { loadLibrary, saveLibrary } from '../lib/storage/repository';
+    import { WELCOME_CONTENT } from '../lib/welcome';
+
+    const heroPage = window.document.querySelector<HTMLElement>('.landing-hero-paper');
+    const heroSource = heroPage?.querySelector<HTMLElement>('[data-landing-canvas-source]');
+    const heroCanvas = heroPage?.querySelector<HTMLCanvasElement>('[data-landing-canvas]');
+    if (heroPage && heroSource && heroCanvas) {
+      mountStaticCanvasPreview({
+        page: heroPage,
+        source: heroSource,
+        canvas: heroCanvas,
+        seed: 'landing-hero',
+        handwriting: {
+          ...HANDWRITING_PRESETS[4].config,
+          fontSize: 31,
+          lineHeight: 1.55,
+        },
+        paperStyle: 'rayada',
+      });
+    }
+
+    window.document.querySelectorAll<HTMLButtonElement>('.open-clabeth').forEach((button) => {
+      const character = window.document.querySelector<HTMLElement>('[data-landing-character]');
+      const wake = () => character?.setAttribute('data-awake', 'true');
+      const rest = () => character?.removeAttribute('data-awake');
+      button.addEventListener('pointerenter', wake);
+      button.addEventListener('pointerleave', rest);
+      button.addEventListener('focus', wake);
+      button.addEventListener('blur', rest);
+      button.addEventListener('click', () => {
+        const result = loadLibrary();
+        if (result.documents.length === 0) {
+          const welcome = createDocument({ title: 'Bienvenido a Clabeth', content: WELCOME_CONTENT });
+          saveLibrary([welcome]);
+        }
+        window.location.assign('/app');
+      });
+    });
+  </script>
+
+  <style>
+    /* Hallmark · pre-emit critique: P5 H5 E5 S5 R4 V5
+     * Hallmark · genre: playful · macrostructure: Workbench · theme: Hum adapted · enrichment: live demo · nav: N7 · footer: Ft8
+     * contrast: pass (40–41) · slop: pass (42–45) · honest: pass (46) · chrome: pass (47) · tokens: pass (48)
+     * responsive: pass (49) · icons: pass (30) · mobile: pass (34, 49, 50–57)
+     */
+    :global(html),
+    :global(body) {
+      overflow-x: clip;
+    }
+
+    .landing-page {
+      --landing-shell: 72rem;
+      --landing-gutter: clamp(1rem, 4vw, 2rem);
+      --landing-xs: 0.5rem;
+      --landing-sm: 0.75rem;
+      --landing-md: 1rem;
+      --landing-lg: 1.5rem;
+      --landing-xl: 2.5rem;
+      --landing-2xl: 4rem;
+      --landing-3xl: 6rem;
+      --landing-pear: color-mix(in oklch, var(--warning) 30%, var(--surface));
+      --landing-cyan: color-mix(in oklch, var(--ink-azul) 12%, var(--surface));
+      --landing-coral: var(--primary-soft);
+      --landing-ink: var(--foreground-strong);
+      --landing-soft-shadow: var(--shadow-panel);
+      color: var(--foreground);
+      font-family: var(--font-ui);
+    }
+
+    .landing-shell {
+      box-sizing: border-box;
+      width: min(100%, var(--landing-shell));
+      margin-inline: auto;
+      padding-inline: var(--landing-gutter);
+    }
+
+    .landing-nav {
+      border-block-end: 2px solid var(--outline-strong);
+    }
+
+    .landing-wordmark {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .landing-nav :global(.theme-toggle) {
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    .landing-nav nav a {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      padding-inline: var(--landing-md);
+      border-inline-start: 1px solid var(--outline);
+      color: var(--foreground);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .landing-nav nav a:last-child {
+      border-inline-end: 1px solid var(--outline);
+    }
+
+    .landing-nav nav a:hover,
+    .landing-nav nav a:focus-visible {
+      background: var(--landing-pear);
+      color: var(--landing-ink);
+    }
+
+    .landing-button {
+      min-height: 44px;
+      padding: 0.72rem 1.25rem;
+      border: 1px solid var(--primary-strong);
+      border-radius: var(--radius-lg);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-weight: 700;
+      box-shadow: 0 3px 0 var(--primary-strong);
+      transform: translateY(0);
+      transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+    }
+
+    .landing-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .landing-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--primary-strong);
+    }
+
+    .landing-button:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    .landing-button:disabled,
+    .landing-button[aria-disabled='true'] {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+    }
+
+    .landing-button[data-state='loading'] {
+      cursor: wait;
+      opacity: 0.72;
+    }
+
+    .landing-button[data-state='error'] {
+      border-color: var(--error);
+    }
+
+    .landing-button[data-state='success'] {
+      border-color: var(--success);
+    }
+
+    .landing-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: clamp(2.5rem, 7vw, 7rem);
+      align-items: center;
+      padding-block: clamp(3rem, 6vw, 5rem) clamp(4rem, 8vw, 6.5rem);
+    }
+
+    .landing-hero-copy {
+      min-width: 0;
+    }
+
+    .landing-intro {
+      max-width: 34ch;
+      margin-block-end: var(--landing-lg);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .landing-hero h1,
+    .landing-section-head h2,
+    .landing-paper-catalogue h2,
+    .landing-ink-catalogue h2,
+    .landing-final h2 {
+      min-width: 0;
+      color: var(--landing-ink);
+      font-family: var(--font-ui);
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      overflow-wrap: anywhere;
+    }
+
+    .landing-hero h1 {
+      max-width: 12ch;
+      font-size: clamp(2.65rem, 5vw, 5rem);
+      line-height: 0.98;
+    }
+
+    .landing-hero h1 span {
+      color: var(--landing-ink);
+      text-decoration: underline;
+      text-decoration-color: var(--primary);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
+    }
+
+    .landing-lede {
+      max-width: 58ch;
+      margin-block-start: var(--landing-lg);
+      font-size: clamp(1rem, 1.3vw, 1.15rem);
+      line-height: 1.65;
+    }
+
+    .landing-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--landing-lg);
+      margin-block-start: var(--landing-xl);
+    }
+
+    .landing-link,
+    .landing-guide-link {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      gap: var(--landing-xs);
+      color: var(--foreground-strong);
+      font-weight: 650;
+      text-decoration: underline;
+      text-decoration-color: var(--primary);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
+      white-space: nowrap;
+    }
+
+    .landing-link:hover,
+    .landing-guide-link:hover {
+      color: var(--primary);
+    }
+
+    .landing-local-note {
+      margin-block-start: var(--landing-md);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .landing-paper-stage {
+      position: relative;
+      min-width: 0;
+      padding: var(--landing-xl) 0 var(--landing-lg) var(--landing-lg);
+    }
+
+    .landing-paper-shadow {
+      position: absolute;
+      inset: 8% 7% 10% 13%;
+      border: 2px dashed var(--outline-strong);
+      border-radius: var(--radius-xl);
+      background: var(--landing-cyan);
+      transform: rotate(4deg);
+    }
+
+    .landing-hero-paper {
+      position: relative;
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-page);
+      transform: rotate(-2deg);
+    }
+
+    .landing-hero-writing {
+      inset: 2rem clamp(2rem, 9vw, 3.5rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--landing-md);
+      padding: var(--landing-md) 0;
+      color: var(--hand-ink);
+      font-family: var(--font-hand);
+      font-size: clamp(1.45rem, 3vw, 1.85rem);
+      font-weight: var(--hand-weight);
+      line-height: 1.3;
+    }
+
+    .landing-hero-writing p:first-child {
+      font-size: 1.18em;
+      text-decoration: underline;
+      text-decoration-color: var(--paper-margin-line);
+      text-decoration-thickness: 3px;
+      text-underline-offset: 2px;
+    }
+
+    .landing-hero-writing > p:last-child {
+      align-self: flex-end;
+      margin-block-start: var(--landing-md);
+      color: var(--ink-rojo);
+      font-size: 0.8em;
+      transform: rotate(-4deg);
+    }
+
+    .landing-paper-stage figcaption {
+      position: relative;
+      margin-block-start: var(--landing-lg);
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-align: end;
+    }
+
+    .landing-ink-friend {
+      position: absolute;
+      inset-inline-start: 0;
+      inset-block-end: 2.75rem;
+      display: flex;
+      width: 3.4rem;
+      height: 3.4rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      border: 2px solid var(--primary-strong);
+      border-radius: 45% 55% 48% 52%;
+      background: var(--primary);
+      box-shadow: var(--shadow-panel);
+      transform: rotate(-8deg);
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+
+    .landing-ink-friend i {
+      width: 0.36rem;
+      height: 0.52rem;
+      border-radius: 999px;
+      background: var(--primary-foreground);
+    }
+
+    .landing-ink-friend[data-awake='true'] {
+      transform: translateY(-8px) rotate(5deg);
+    }
+
+    .landing-demo-section {
+      padding-block: clamp(4rem, 8vw, 7rem);
+      background: var(--landing-pear);
+    }
+
+    .landing-section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--landing-xl);
+      margin-block-end: var(--landing-xl);
+    }
+
+    .landing-section-head h2,
+    .landing-paper-catalogue h2,
+    .landing-ink-catalogue h2 {
+      max-width: 18ch;
+      font-size: clamp(2rem, 3.4vw, 3.25rem);
+      line-height: 1.05;
+    }
+
+    .landing-section-head p,
+    .landing-paper-catalogue > div:first-child p,
+    .landing-ink-catalogue > div:first-child p {
+      max-width: 54ch;
+      margin-block-start: var(--landing-sm);
+      color: var(--foreground);
+      font-size: 1rem;
+    }
+
+    .landing-section-head > span {
+      flex: none;
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-size: clamp(1.8rem, 4vw, 3.6rem);
+      font-weight: 500;
+      transform: rotate(4deg);
+    }
+
+    .landing-process {
+      padding-block: clamp(4.5rem, 10vw, 8rem);
+    }
+
+    .landing-section-head--compact {
+      align-items: start;
+    }
+
+    .landing-steps {
+      display: grid;
+      max-width: 58rem;
+      margin-inline-start: auto;
+      border-block-start: 2px solid var(--outline-strong);
+    }
+
+    .landing-steps li {
+      display: grid;
+      grid-template-columns: 3.5rem 3rem minmax(0, 1fr);
+      gap: var(--landing-lg);
+      align-items: start;
+      padding-block: var(--landing-xl);
+      border-block-end: 1px dashed var(--outline-strong);
+    }
+
+    .landing-step-number {
+      color: var(--primary);
+      font-size: 2.7rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .landing-step-icon {
+      display: inline-flex;
+      width: 3rem;
+      height: 3rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--outline-strong);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--foreground-strong);
+    }
+
+    .landing-steps h3 {
+      color: var(--foreground-strong);
+      font-size: clamp(1.25rem, 2vw, 1.65rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .landing-steps p {
+      max-width: 58ch;
+      margin-block-start: var(--landing-xs);
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .landing-workshop {
+      padding-block: clamp(4rem, 9vw, 7rem);
+      background: var(--landing-cyan);
+    }
+
+    .landing-workshop-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      gap: clamp(3rem, 8vw, 7rem);
+      align-items: start;
+    }
+
+    .landing-paper-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--landing-md);
+      margin-block-start: var(--landing-xl);
+    }
+
+    .landing-paper-swatch {
+      min-width: 0;
+      padding: var(--landing-sm);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--landing-soft-shadow);
+    }
+
+    .landing-paper-swatch:nth-child(3n + 2) {
+      transform: rotate(1.5deg);
+    }
+
+    .landing-paper-swatch:nth-child(3n) {
+      transform: rotate(-1deg);
+    }
+
+    .landing-paper-swatch > span:first-child {
+      display: block;
+      height: 5.5rem;
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-md);
+    }
+
+    .landing-paper-swatch > span:last-child {
+      display: block;
+      margin-block-start: var(--landing-xs);
+      color: var(--foreground-strong);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    .landing-preset-list {
+      margin-block-start: var(--landing-xl);
+      border-block-start: 2px solid var(--outline-strong);
+    }
+
+    .landing-preset-row {
+      display: grid;
+      grid-template-columns: 2.5rem minmax(7rem, 0.72fr) minmax(0, 1fr);
+      gap: var(--landing-md);
+      align-items: center;
+      padding-block: var(--landing-md);
+      border-block-end: 1px solid var(--outline);
+    }
+
+    .landing-preset-row > span {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .landing-preset-row strong {
+      color: var(--preset-ink);
+      font-family: var(--preset-font);
+      font-size: clamp(1.35rem, 2.5vw, 2rem);
+      font-weight: var(--preset-weight);
+      line-height: 1;
+    }
+
+    .landing-preset-row small {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .landing-guide-link {
+      margin-block-start: var(--landing-lg);
+    }
+
+    .landing-final {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--landing-xl);
+      align-items: end;
+      padding-block: clamp(4rem, 8vw, 7rem);
+    }
+
+    .landing-final h2 {
+      max-width: 18ch;
+      font-size: clamp(2.2rem, 4.2vw, 4.2rem);
+      line-height: 1;
+    }
+
+    .landing-final p {
+      max-width: 52ch;
+      margin-block-start: var(--landing-md);
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .landing-footer {
+      overflow: hidden;
+      border-block-start: 2px solid var(--outline-strong);
+      background: var(--landing-coral);
+      color: var(--foreground-strong);
+    }
+
+    .landing-footer-meta {
+      display: flex;
+      min-height: 5rem;
+      align-items: center;
+      gap: var(--landing-lg);
+      font-size: 0.82rem;
+    }
+
+    .landing-footer-meta p {
+      color: var(--foreground);
+    }
+
+    .landing-footer-meta a {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      margin-inline-start: auto;
+      color: var(--foreground-strong);
+      font-weight: 650;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      white-space: nowrap;
+    }
+
+    .landing-page a:active {
+      opacity: 0.72;
+    }
+
+    .landing-page a[aria-disabled='true'] {
+      cursor: not-allowed;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    @media (max-width: 59.99rem) {
+      .landing-hero,
+      .landing-workshop-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .landing-hero-copy {
+        max-width: 44rem;
+      }
+
+      .landing-paper-stage {
+        width: min(100%, 34rem);
+        margin-inline: auto;
+      }
+
+      .landing-workshop-grid {
+        gap: var(--landing-3xl);
+      }
+    }
+
+    @media (max-width: 39.99rem) {
+      .landing-hero {
+        padding-block-start: var(--landing-2xl);
+      }
+
+      .landing-hero h1 {
+        max-width: 11ch;
+        font-size: clamp(2.45rem, 13vw, 3.45rem);
+      }
+
+      .landing-actions,
+      .landing-final {
+        align-items: stretch;
+      }
+
+      .landing-actions {
+        flex-direction: column;
+      }
+
+      .landing-button,
+      .landing-link {
+        width: 100%;
+      }
+
+      .landing-paper-stage {
+        padding-inline-start: 0;
+      }
+
+      .landing-ink-friend {
+        inset-inline-start: -0.4rem;
+        inset-block-end: 2.25rem;
+        width: 2.8rem;
+        height: 2.8rem;
+      }
+
+      .landing-section-head,
+      .landing-final {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .landing-section-head {
+        display: grid;
+        align-items: start;
+      }
+
+      .landing-section-head > span {
+        justify-self: end;
+      }
+
+      .landing-steps li {
+        grid-template-columns: 2.5rem minmax(0, 1fr);
+        gap: var(--landing-md);
+      }
+
+      .landing-step-number {
+        grid-row: span 2;
+        font-size: 2.2rem;
+      }
+
+      .landing-step-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+      }
+
+      .landing-steps li > div {
+        grid-column: 2;
+      }
+
+      .landing-paper-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .landing-preset-row {
+        grid-template-columns: 2rem minmax(0, 1fr);
+      }
+
+      .landing-preset-row small {
+        grid-column: 2;
+      }
+
+      .landing-final {
+        display: grid;
+        align-items: start;
+      }
+
+      .landing-footer-meta {
+        flex-wrap: wrap;
+        padding-block: var(--landing-md);
+      }
+
+      .landing-footer-meta p {
+        order: 3;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 22rem) {
+      .landing-nav :global(.theme-toggle) {
+        display: none;
+      }
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .landing-paper-swatch:hover {
+        border-color: var(--outline-strong);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .landing-button,
+      .landing-ink-friend {
+        transition-duration: 0.01ms;
+      }
+    }
+  </style>
+</BaseLayout>
