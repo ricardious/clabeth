@@ -1,6 +1,6 @@
-import type { ClabethDocument } from '../types/document';
-import type { HandwritingConfig } from '../types/handwriting';
-import type { PaperConfig } from '../types/paper';
+import type { ClabethDocument } from './types/document';
+import type { HandwritingConfig } from './types/handwriting';
+import type { PaperConfig } from './types/paper';
 import { createId } from './utils/id';
 import { getPreset } from './handwriting/presets';
 import { DEFAULT_PAPER, getPaperStyle } from './paper/styles';
