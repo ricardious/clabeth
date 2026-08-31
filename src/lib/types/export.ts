@@ -1,3 +1,4 @@
+/** Tipos de dominio usados por la exportación. */
 export type ExportFormat = 'pdf' | 'png';
 
 export type ExportRange = 'actual' | 'todas' | 'rango';
@@ -15,4 +16,10 @@ export interface ExportOptions {
   includePageNumbers: boolean;
   includeHeader: boolean;
   includeFooter: boolean;
+}
+
+export interface ExportProgress {
+  phase: 'preparing' | 'rendering' | 'finishing';
+  current: number;
+  total: number;
 }
