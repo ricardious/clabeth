@@ -1,14 +1,14 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import { Download, Monitor, Moon, Sun, Trash2, Upload } from '@lucide/astro';
+import { Download, Moon, Sun, Trash2, Upload } from '@lucide/astro';
 import Kbd from '../../components/atoms/Kbd.astro';
+import Select from '../../components/atoms/Select.astro';
 import { HANDWRITING_PRESETS } from '../../lib/handwriting/presets';
 import { PAGE_SIZES, PAPER_STYLES } from '../../lib/paper/styles';
 
 const themes = [
   { id: 'light', label: 'Claro', description: 'Papel y tinta de día.', icon: Sun },
   { id: 'dark', label: 'Oscuro', description: 'Escritorio de noche, hoja clara.', icon: Moon },
-  { id: 'system', label: 'Sistema', description: 'Sigue la configuración del sistema.', icon: Monitor },
 ] as const;
 
 const shortcuts = [
@@ -32,7 +32,7 @@ const shortcuts = [
 
     <section aria-labelledby="h-tema" class="space-y-3">
       <h3 id="h-tema" class="text-sm font-semibold text-foreground">Apariencia</h3>
-      <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Tema de la interfaz">
+      <div class="grid grid-cols-2 gap-2 sm:max-w-md" role="radiogroup" aria-label="Tema de la interfaz">
         {themes.map(({ id, label, description, icon: Icon }) => (
           <button
             type="button"
@@ -53,24 +53,24 @@ const shortcuts = [
     <section aria-labelledby="h-nuevos" class="space-y-3">
       <h3 id="h-nuevos" class="text-sm font-semibold text-foreground">Documentos nuevos</h3>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <label class="block">
+        <div class="block">
           <span class="mb-1 block text-[13px] text-foreground">Estilo de escritura</span>
-          <select data-setting="defaultPresetId" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+          <Select data-setting="defaultPresetId" aria-label="Estilo de escritura de los documentos nuevos">
             {HANDWRITING_PRESETS.map((preset) => <option value={preset.id}>{preset.name}</option>)}
-          </select>
-        </label>
-        <label class="block">
+          </Select>
+        </div>
+        <div class="block">
           <span class="mb-1 block text-[13px] text-foreground">Papel por defecto</span>
-          <select data-setting="defaultPaperStyle" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+          <Select data-setting="defaultPaperStyle" aria-label="Papel por defecto de los documentos nuevos">
             {PAPER_STYLES.map((style) => <option value={style.id}>{style.name}</option>)}
-          </select>
-        </label>
-        <label class="block">
+          </Select>
+        </div>
+        <div class="block">
           <span class="mb-1 block text-[13px] text-foreground">Tamaño por defecto</span>
-          <select data-setting="defaultPageSize" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+          <Select data-setting="defaultPageSize" aria-label="Tamaño por defecto de los documentos nuevos">
             {Object.entries(PAGE_SIZES).map(([id, definition]) => <option value={id}>{definition.name}</option>)}
-          </select>
-        </label>
+          </Select>
+        </div>
       </div>
     </section>
 
@@ -79,10 +79,10 @@ const shortcuts = [
     <section aria-labelledby="h-biblioteca" class="space-y-3">
       <h3 id="h-biblioteca" class="text-sm font-semibold text-foreground">Biblioteca</h3>
       <div class="flex flex-wrap gap-2">
-        <button id="export-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-panel">
+        <button id="export-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-hover">
           <Download size={15} aria-hidden="true" /> Exportar copia (JSON)
         </button>
-        <button id="import-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-panel">
+        <button id="import-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-medium text-foreground hover:bg-hover">
           <Upload size={15} aria-hidden="true" /> Importar copia
         </button>
         <button id="clear-library" type="button" class="inline-flex h-[var(--control-h-md)] items-center gap-1.5 rounded-md border border-error px-3 text-sm font-medium text-error hover:bg-primary-soft">
@@ -113,7 +113,7 @@ const shortcuts = [
       <h2 id="clear-title" class="font-display text-lg font-semibold text-foreground-strong">Borrar todos los documentos</h2>
       <p class="mt-2 text-sm text-muted">Se eliminarán todos los documentos de este navegador. Esta acción no se puede deshacer.</p>
       <div class="mt-5 flex justify-end gap-2">
-        <button id="cancel-clear" type="button" class="h-[var(--control-h-md)] rounded-md px-3 text-sm text-muted hover:bg-panel">Cancelar</button>
+        <button id="cancel-clear" type="button" class="h-[var(--control-h-md)] rounded-md px-3 text-sm text-muted hover:bg-hover">Cancelar</button>
         <button id="confirm-clear" type="button" class="h-[var(--control-h-md)] rounded-md bg-error px-3 text-sm font-medium text-primary-foreground">Borrar todo</button>
       </div>
     </div>
@@ -122,28 +122,38 @@ const shortcuts = [
   <script>
     import type { PageSizeId, PaperStyleId } from '../../lib/types/paper';
     import type { ThemeMode } from '../../lib/types/theme';
+    import { SETTINGS_KEY, SETTINGS_VERSION, readStoredTheme } from '../../lib/theme-storage';
     import { exportLibraryJson, importLibraryJson, loadLibrary, saveLibrary } from '../../lib/storage/repository';
 
-    const settingsKey = 'clabeth.settings.v1';
+    const defaults: Omit<StoredSettings, 'theme'> = {
+      defaultPresetId: 'clara',
+      defaultPaperStyle: 'libreta',
+      defaultPageSize: 'a4',
+    };
+
     interface StoredSettings {
       theme: ThemeMode;
       defaultPresetId: string;
       defaultPaperStyle: PaperStyleId;
       defaultPageSize: PageSizeId;
     }
-    const defaults: StoredSettings = { theme: 'light', defaultPresetId: 'clara', defaultPaperStyle: 'libreta', defaultPageSize: 'a4' };
 
     function readSettings(): StoredSettings {
       try {
-        const stored = JSON.parse(localStorage.getItem(settingsKey) ?? '{}') as { state?: Partial<StoredSettings> };
-        return { ...defaults, ...stored.state };
+        const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as {
+          state?: Partial<StoredSettings>;
+        };
+        return { ...defaults, ...stored.state, theme: readStoredTheme() };
       } catch {
-        return { ...defaults };
+        return { ...defaults, theme: 'light' };
       }
     }
 
     function writeSettings(settings: StoredSettings): void {
-      localStorage.setItem(settingsKey, JSON.stringify({ state: settings, version: 1 }));
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ state: settings, version: SETTINGS_VERSION }),
+      );
     }
 
     function renderSettings(settings: StoredSettings): void {
@@ -158,20 +168,33 @@ const shortcuts = [
       window.document.querySelectorAll<HTMLSelectElement>('[data-setting]').forEach((select) => {
         const key = select.dataset.setting as keyof StoredSettings;
         select.value = settings[key];
+        // Avisa al Select propio de que el valor cambió por código.
+        select.dispatchEvent(new CustomEvent('clabeth:select-sync', { bubbles: true }));
       });
     }
 
     let settings = readSettings();
     renderSettings(settings);
+
     window.document.querySelectorAll<HTMLButtonElement>('.theme-choice').forEach((choice) => {
       choice.addEventListener('click', () => {
-        settings = { ...settings, theme: choice.dataset.themeChoice as ThemeMode };
+        const theme = choice.dataset.themeChoice as ThemeMode;
+        settings = { ...settings, theme };
         writeSettings(settings);
-        if (settings.theme === 'system') window.document.documentElement.removeAttribute('data-theme');
-        else window.document.documentElement.dataset.theme = settings.theme;
+        window.document.documentElement.dataset.theme = theme;
         renderSettings(settings);
+        // Mantiene sincronizado el interruptor de la barra lateral.
+        window.dispatchEvent(new CustomEvent<ThemeMode>('clabeth:theme', { detail: theme }));
       });
     });
+
+    // El interruptor de la barra lateral también cambia el tema: refleja aquí
+    // cuál de las dos tarjetas queda marcada.
+    window.addEventListener('clabeth:theme', (event) => {
+      settings = { ...settings, theme: (event as CustomEvent<ThemeMode>).detail };
+      renderSettings(settings);
+    });
+
     window.document.querySelectorAll<HTMLSelectElement>('[data-setting]').forEach((select) => {
       select.addEventListener('change', () => {
         settings = { ...settings, [select.dataset.setting as string]: select.value };
