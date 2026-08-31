@@ -1,4 +1,9 @@
-import type { HandwritingConfig } from '../../lib/types/handwriting';import { HANDWRITING_PRESETS, getPreset } from '../../lib/handwriting/presets';
+import type { HandwritingConfig } from '../../lib/types/handwriting';
+import {
+  HANDWRITING_PRESETS,
+  getPresetStyle,
+  matchesPresetStyle,
+} from '../../lib/handwriting/presets';
 import { HANDWRITING_FONTS } from '../../lib/handwriting/fonts';
 import { INK_COLORS } from '../../lib/handwriting/inks';
 import { Select } from '../atoms/Select';
@@ -14,19 +19,23 @@ export interface HandwritingPanelProps {
 
 export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
   const activePresetId =
-    HANDWRITING_PRESETS.find((preset) => JSON.stringify(preset.config) === JSON.stringify(config))?.id ?? null;
+    HANDWRITING_PRESETS.find((preset) => matchesPresetStyle(config, preset))?.id ?? null;
 
   return (
     <div className="space-y-4 p-3">
       <section aria-label="Estilos predefinidos">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Estilos</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Estilos de trazo</h3>
+        <p className="mb-2 mt-1 text-xs leading-relaxed text-muted">
+          Ajustan el trazo sin cambiar la fuente elegida.
+        </p>
         <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Estilo manuscrito">
           {HANDWRITING_PRESETS.map((preset) => (
             <PresetCard
               key={preset.id}
               preset={preset}
+              fontId={config.fontId}
               selected={activePresetId === preset.id}
-              onSelect={(id) => onChange({ ...getPreset(id).config })}
+              onSelect={(id) => onChange(getPresetStyle(id))}
             />
           ))}
         </div>

@@ -5,12 +5,13 @@ import { cn } from '../../lib/utils/cn';
 
 export interface PresetCardProps {
   preset: HandwritingPreset;
+  fontId: string;
   selected: boolean;
   onSelect: (id: string) => void;
 }
 
-export function PresetCard({ preset, selected, onSelect }: PresetCardProps) {
-  const font = getHandwritingFont(preset.config.fontId);
+export function PresetCard({ preset, fontId, selected, onSelect }: PresetCardProps) {
+  const font = getHandwritingFont(fontId);
   const ink = getInk(preset.config.inkId);
   return (
     <button
@@ -28,8 +29,16 @@ export function PresetCard({ preset, selected, onSelect }: PresetCardProps) {
       <span
         aria-hidden
         className="block text-[19px] leading-tight"
-        // Fuente y tinta del preset: variables dinámicas de escritura.
-        style={{ fontFamily: font.family, color: `var(${ink.token})`, fontWeight: preset.config.weight }}
+        // La fuente activa se conserva; la tarjeta anticipa los demás ajustes del estilo.
+        style={{
+          fontFamily: font.family,
+          color: `var(${ink.token})`,
+          fontWeight: preset.config.weight,
+          letterSpacing: `${preset.config.letterSpacing}px`,
+          wordSpacing: `${preset.config.wordSpacing}px`,
+          opacity: preset.config.opacity,
+          transform: `skewX(${preset.config.slant}deg)`,
+        }}
       >
         Escribir a mano
       </span>
