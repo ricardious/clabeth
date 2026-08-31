@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolvePageIndices } from './options';
-import type { ExportOptions } from '../../types/export';
+import type { ExportOptions } from '../types/export';
 
 const options = (overrides: Partial<ExportOptions>): ExportOptions => ({
   format: 'pdf',
