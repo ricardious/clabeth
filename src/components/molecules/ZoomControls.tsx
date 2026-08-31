@@ -1,6 +1,6 @@
 import { Minus, Plus } from 'lucide-react';
 import { IconButton } from '../atoms/IconButton';
-import { useUiStore, ZOOM_MAX, ZOOM_MIN } from '../../store/ui';
+import { useUiStore, ZOOM_MAX, ZOOM_MIN } from '../../lib/store/ui';
 
 export function ZoomControls() {
   const zoom = useUiStore((state) => state.zoom);
