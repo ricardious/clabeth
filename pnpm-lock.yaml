@@ -35,9 +35,6 @@ importers:
       '@fontsource/kalam':
         specifier: ^5.2.5
         version: 5.3.0
-      '@fontsource/la-belle-aurore':
-        specifier: ^5.2.5
-        version: 5.3.0
       '@fontsource/patrick-hand':
         specifier: ^5.3.0
         version: 5.3.0
@@ -801,9 +798,6 @@ packages:
 
   '@fontsource/kalam@5.3.0':
     resolution: {integrity: sha512-FDkVoDfPDCSN/eO81FOYtUI67eMgpVBJmjBtAqSL0PmEhJyeFY2biC+CR+yEttksgXR9+swpFdYmQTyjwBq80Q==}
-
-  '@fontsource/la-belle-aurore@5.3.0':
-    resolution: {integrity: sha512-EEzeg3+Ym/9ESBw98/8OckEDxlkMMrR0wlwctGNX9oN1X2DyQHHLppB/ErwfwkptiWtkZYRNyNfZPkUcaFn/Ag==}
 
   '@fontsource/patrick-hand@5.3.0':
     resolution: {integrity: sha512-V8C38IlIFfdWg0Xtri3F7sLCVpm069rUwn6w4n+oyn38gt7H4arOJmuReg3tAw1Q6jHqZp89wTnAAJagq4Atxw==}
@@ -3844,8 +3838,6 @@ snapshots:
   '@fontsource/instrument-sans@5.3.0': {}
 
   '@fontsource/kalam@5.3.0': {}
-
-  '@fontsource/la-belle-aurore@5.3.0': {}
 
   '@fontsource/patrick-hand@5.3.0': {}
 
