@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSettingsStore } from '../store/settings';
+import { useSettingsStore } from '../lib/store/settings';
 
 /**
  * Aplica el tema al documento:
