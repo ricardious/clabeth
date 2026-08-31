@@ -416,10 +416,10 @@
   background: color-mix(in oklch, var(--paper-margin-line) 28%, transparent);
 }
 
-/* ——— KaTeX: las fórmulas conservan precisión ——— */
-.hand-scope .katex {
-  font-size: 1.04em;
-}
+/* ——— KaTeX: las fórmulas conservan precisión ———
+   El tamaño y la apariencia de la fórmula viven en formulas.css, que se
+   importa después que este archivo. Declarar aquí `font-size` no tenía
+   efecto y hacía creer que se podía ajustar desde dos sitios. */
 
 /* Sin overflow oculto en vertical: algunos glifos manuscritos (Reenie, etc.)
    sobresalen del em box de KaTeX y se cortarían si se recortara la caja. */
@@ -427,22 +427,33 @@
   margin: 0.35em 0;
 }
 
-/* Fórmula inválida: chip comprensible, el código original se conserva */
+/* Fórmula inválida: chip comprensible, el código original se conserva.
+
+   El chip existe para que puedas leer y corregir tu LaTeX, así que muestra la
+   fuente entera: antes iba en una sola línea recortada con puntos suspensivos,
+   y una fórmula larga (un \begin{aligned} de varias líneas, por ejemplo)
+   quedaba reducida a un cuadrito ilegible.
+
+   `display: inline` permite que fluya y se parta en varias líneas;
+   `box-decoration-break: clone` cierra el borde discontinuo en cada fragmento
+   para que se siga leyendo como un único bloque marcado. */
 .latex-error-chip {
-  display: inline-block;
+  display: inline;
   font-family: var(--font-mono);
-  font-size: 0.68em;
+  font-size: 0.72em;
+  line-height: 1.6;
   color: var(--error);
   background: color-mix(in oklch, var(--error) 8%, var(--paper));
   border: 1px dashed var(--error);
   border-radius: var(--radius-sm);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   padding: 0.05em 0.4em;
   cursor: help;
-  white-space: nowrap;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: baseline;
+  /* Conserva los espacios del original y permite el salto de línea. */
+  white-space: pre-wrap;
+  /* Un encadenado largo de macros sin espacios también debe poder partirse. */
+  overflow-wrap: anywhere;
 }
 
 /* ——— Exportación sin fondo: página plana ——— */
