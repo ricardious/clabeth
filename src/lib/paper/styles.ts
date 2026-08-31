@@ -1,4 +1,4 @@
-import type { PageDimensions, PageOrientation, PageSizeId, PaperConfig, PaperStyleDef } from '../../types/paper';
+import type { PageDimensions, PageOrientation, PageSizeId, PaperConfig, PaperStyleDef } from '../types/paper';
 
 export const PAPER_STYLES: PaperStyleDef[] = [
   { id: 'blanca', name: 'Blanca', description: 'Hoja limpia sin reglura.', hasMarginLine: false },
