@@ -409,7 +409,7 @@
   font-size: 1.04em;
 }
 
-/* Sin overflow oculto en vertical: los glifos manuscritos (Caveat, Kalam…)
+/* Sin overflow oculto en vertical: los glifos manuscritos (Reenie, Kalam…)
    sobresalen del em box de KaTeX y se cortarían si se recortara la caja. */
 .hand-scope .katex-display {
   margin: 0.35em 0;

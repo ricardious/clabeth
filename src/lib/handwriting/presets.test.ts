@@ -96,7 +96,8 @@ describe('presets y catálogos', () => {
     expect(getHandwritingFont('hw-5').id).toBe('gochi');
     expect(getHandwritingFont('hw-6').id).toBe('playwrite-es');
     expect(getHandwritingFont('hw-8').id).toBe('patrick');
-    expect(getHandwritingFont('hw-9').id).toBe('caveat');
+    expect(getHandwritingFont('hw-9').id).toBe('reenie');
+    expect(getHandwritingFont('caveat').id).toBe('reenie');
     expect(getHandwritingFont('labelle').id).toBe('playwrite-es');
   });
 

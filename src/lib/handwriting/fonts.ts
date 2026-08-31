@@ -10,9 +10,15 @@ export const HANDWRITING_FONTS: HandwritingFont[] = [
     family: "'Playwrite ES Variable', cursive",
     weights: [100, 200, 300, 400],
   },
+  { id: 'reenie', name: 'Reenie Beanie', family: "'Reenie Beanie', cursive", weights: [400] },
+  {
+    id: 'nothing-you-could-do',
+    name: 'Nothing You Could Do',
+    family: "'Nothing You Could Do', cursive",
+    weights: [400],
+  },
   { id: 'patrick', name: 'Patrick Hand', family: "'Patrick Hand', cursive", weights: [400] },
   { id: 'gochi', name: 'Gochi Hand', family: "'Gochi Hand', cursive", weights: [400] },
-  { id: 'caveat', name: 'Caveat', family: "'Caveat', cursive", weights: [400, 500, 600, 700] },
   { id: 'kalam', name: 'Kalam', family: "'Kalam', cursive", weights: [300, 400, 700] },
   {
     id: 'shadows',
@@ -36,7 +42,9 @@ export function getHandwritingFont(id: string): HandwritingFont {
   if (id === 'hw-5') return HANDWRITING_FONTS.find((font) => font.id === 'gochi')!;
   if (id === 'hw-6') return HANDWRITING_FONTS.find((font) => font.id === 'playwrite-es')!;
   if (id === 'hw-8') return HANDWRITING_FONTS.find((font) => font.id === 'patrick')!;
-  if (id === 'hw-9') return HANDWRITING_FONTS.find((font) => font.id === 'caveat')!;
+  if (id === 'hw-9' || id === 'caveat') {
+    return HANDWRITING_FONTS.find((font) => font.id === 'reenie')!;
+  }
   if (id === 'labelle') return HANDWRITING_FONTS.find((font) => font.id === 'playwrite-es')!;
   return HANDWRITING_FONTS.find((font) => font.id === id) ?? HANDWRITING_FONTS[0];
 }
