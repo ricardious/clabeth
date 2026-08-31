@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/atoms/Logo.astro';
+---
+
+<BaseLayout title="Página no encontrada — Clabeth">
+  <main class="flex h-full flex-col items-center justify-center gap-4 bg-background p-8 text-center">
+    <span class="font-display text-7xl font-semibold text-primary">404</span>
+    <h1 class="font-display text-2xl font-semibold text-foreground-strong">Esta hoja no existe</h1>
+    <p class="max-w-sm text-sm text-muted">La dirección no se encuentra en Clabeth. Quizá el documento fue movido o la ruta tiene una errata.</p>
+    <div class="mt-2 flex items-center gap-3">
+      <a href="/app" class="inline-flex h-[var(--control-h-md)] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary-strong">Mis documentos</a>
+      <a href="/" class="text-sm text-primary hover:underline">Volver a la portada</a>
+    </div>
+    <Logo size="sm" class="mt-8 opacity-60" />
+  </main>
+  <script>
+    const legacyEditor = window.location.pathname.match(/^\/app\/editor\/([^/]+)\/?$/);
+    if (legacyEditor?.[1]) {
+      window.location.replace(`/app/editor?id=${encodeURIComponent(legacyEditor[1])}`);
+    }
+  </script>
+</BaseLayout>
