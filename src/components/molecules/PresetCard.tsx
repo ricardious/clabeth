@@ -1,4 +1,4 @@
-import type { HandwritingPreset } from '../../types/handwriting';
+import type { HandwritingPreset } from '../../lib/types/handwriting';
 import { getHandwritingFont } from '../../lib/handwriting/fonts';
 import { getInk } from '../../lib/handwriting/inks';
 import { cn } from '../../lib/utils/cn';
