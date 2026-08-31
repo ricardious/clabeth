@@ -35,9 +35,6 @@ importers:
       '@fontsource/just-me-again-down-here':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource/kalam':
-        specifier: ^5.2.5
-        version: 5.3.0
       '@fontsource/nothing-you-could-do':
         specifier: ^5.3.0
         version: 5.3.0
@@ -807,9 +804,6 @@ packages:
 
   '@fontsource/just-me-again-down-here@5.3.0':
     resolution: {integrity: sha512-HePfS55Wx8gjeNBbR3vac6vo/ZpDkM2gklaCX2q/wQL/raX1tw+ku7l0B8DsrSOnukoh+3ULV8yKug5e+EJchw==}
-
-  '@fontsource/kalam@5.3.0':
-    resolution: {integrity: sha512-FDkVoDfPDCSN/eO81FOYtUI67eMgpVBJmjBtAqSL0PmEhJyeFY2biC+CR+yEttksgXR9+swpFdYmQTyjwBq80Q==}
 
   '@fontsource/nothing-you-could-do@5.3.0':
     resolution: {integrity: sha512-695oxA7Odedd4rqN9aDhgVUwtyYhfmIJH02y32g/B0yoaVMRwTCZe3TYFt8LodpKeN/8v5w+svcyde0eBBE28g==}
@@ -3856,8 +3850,6 @@ snapshots:
   '@fontsource/instrument-sans@5.3.0': {}
 
   '@fontsource/just-me-again-down-here@5.3.0': {}
-
-  '@fontsource/kalam@5.3.0': {}
 
   '@fontsource/nothing-you-could-do@5.3.0': {}
 

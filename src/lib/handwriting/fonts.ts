@@ -31,7 +31,6 @@ export const HANDWRITING_FONTS: HandwritingFont[] = [
   },
   { id: 'patrick', name: 'Patrick Hand', family: "'Patrick Hand', cursive", weights: [400] },
   { id: 'gochi', name: 'Gochi Hand', family: "'Gochi Hand', cursive", weights: [400] },
-  { id: 'kalam', name: 'Kalam', family: "'Kalam', cursive", weights: [300, 400, 700] },
   {
     id: 'shadows',
     name: 'Shadows Into Light',
@@ -57,6 +56,7 @@ export function getHandwritingFont(id: string): HandwritingFont {
   if (id === 'hw-9' || id === 'caveat') {
     return HANDWRITING_FONTS.find((font) => font.id === 'reenie')!;
   }
+  if (id === 'kalam') return HANDWRITING_FONTS.find((font) => font.id === 'patrick')!;
   if (id === 'labelle') return HANDWRITING_FONTS.find((font) => font.id === 'playwrite-es')!;
   return HANDWRITING_FONTS.find((font) => font.id === id) ?? HANDWRITING_FONTS[0];
 }

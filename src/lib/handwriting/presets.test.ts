@@ -125,9 +125,10 @@ describe('presets y catálogos', () => {
       'give-you-glory',
     ]));
     expect(fontIds).not.toContain('caveat');
+    expect(fontIds).not.toContain('kalam');
   });
 
-  it('los IDs antiguos con cobertura incompleta migran a fuentes con español', () => {
+  it('los IDs retirados migran a fuentes aprobadas para español', () => {
     expect(getHandwritingFont('hw-1').id).toBe('patrick');
     expect(getHandwritingFont('hw-2').id).toBe('gochi');
     expect(getHandwritingFont('hw-5').id).toBe('gochi');
@@ -135,6 +136,7 @@ describe('presets y catálogos', () => {
     expect(getHandwritingFont('hw-8').id).toBe('patrick');
     expect(getHandwritingFont('hw-9').id).toBe('reenie');
     expect(getHandwritingFont('caveat').id).toBe('reenie');
+    expect(getHandwritingFont('kalam').id).toBe('patrick');
     expect(getHandwritingFont('labelle').id).toBe('playwrite-es');
   });
 

@@ -3,7 +3,7 @@ export type FormulaStyle = 'tipografica' | 'sutil' | 'manuscrita';
 
 /** Configuración manuscrita de un documento. */
 export interface HandwritingConfig {
-  /** Familia manuscrita: id del catálogo (reenie, kalam, ...). */
+  /** Familia manuscrita: id del catálogo (reenie, patrick, ...). */
   fontId: string;
   /** Tamaño en px. */
   fontSize: number;
