@@ -1,9 +1,0 @@
-{
-  "date": "2026-08-12",
-  "framework": "Astro 7",
-  "styling": "Tailwind CSS v4 with semantic OKLCH tokens",
-  "fonts": ["Fraunces Variable", "Instrument Sans", "IBM Plex Mono"],
-  "motion": "CSS only; no external motion library",
-  "spacing": "Existing Tailwind and component spacing scale",
-  "preserve": ["semantic tokens", "font stack", "light/dark modes", "Astro-first architecture"]
-}
