@@ -1,4 +1,4 @@
-import type { PaperStyleId } from '../types/paper';
+import type { PaperStyleId } from './types/paper';
 
 export interface DocumentTemplate {
   id: string;
