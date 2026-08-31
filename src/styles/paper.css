@@ -23,8 +23,12 @@
 }
 
 /* ——— Fondos de papel ——— */
+/* `isolation` acota el multiply de la escritura al interior de la hoja: sin
+   ella, una miniatura sobre una tarjeta oscura se mezclaría con la tarjeta y
+   se volvería negra en tema oscuro. */
 .paper-bg {
   background-color: var(--paper);
+  isolation: isolate;
 }
 
 .paper-blanca {
@@ -253,8 +257,16 @@
   word-spacing: var(--hand-word-spacing);
   font-weight: var(--hand-weight);
   color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
-  mix-blend-mode: multiply;
   text-rendering: optimizeLegibility;
+}
+
+/* La tinta solo se multiplica cuando tiene papel debajo. Si `.hand-scope` es a
+   la vez la superficie de papel (miniaturas, ejemplos de las guías), el
+   multiply mezclaría la hoja con la tarjeta que hay detrás y en tema oscuro la
+   dejaría negra. */
+.page .hand-scope,
+.paper-bg .hand-scope {
+  mix-blend-mode: multiply;
 }
 
 /* Presión y sangrado simulan varias pasadas microscópicas del trazo. */

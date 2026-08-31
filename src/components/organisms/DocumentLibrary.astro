@@ -60,7 +60,9 @@ import { PAPER_STYLES } from '../../lib/paper/styles';
   <article class="group flex flex-col overflow-hidden rounded-lg border border-outline bg-surface shadow-panel transition-shadow duration-[var(--dur-med)] hover:shadow-pop">
     <button data-open-preview type="button" class="relative block h-44 overflow-hidden bg-panel text-left">
       <div class="pointer-events-none absolute inset-0 flex items-start justify-center pt-3">
-        <div data-thumbnail class="paper-bg hand-scope h-[150px] w-[190px] overflow-hidden rounded-sm border border-outline p-3"></div>
+        <div data-thumbnail-paper class="paper-bg h-[150px] w-[190px] overflow-hidden rounded-sm border border-outline">
+          <div data-thumbnail class="hand-scope h-full w-full overflow-hidden p-3"></div>
+        </div>
       </div>
       <span class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--panel)] to-transparent" aria-hidden="true"></span>
     </button>
@@ -189,6 +191,7 @@ import { PAPER_STYLES } from '../../lib/paper/styles';
     if (!card) return null;
     const openPreview = card.querySelector<HTMLButtonElement>('[data-open-preview]');
     const openTitle = card.querySelector<HTMLButtonElement>('[data-open-title]');
+    const thumbnailPaper = card.querySelector<HTMLElement>('[data-thumbnail-paper]');
     const thumbnail = card.querySelector<HTMLElement>('[data-thumbnail]');
     const stats = textStats(document.content);
     const pages = estimatePages(stats.words, document.handwriting.fontSize, document.handwriting.lineHeight, contentWidth(document.paper), contentHeight(document.paper));
@@ -200,10 +203,12 @@ import { PAPER_STYLES } from '../../lib/paper/styles';
     card.querySelector<HTMLElement>('[data-preset-badge]')!.textContent = presetName(document);
     card.querySelector<HTMLElement>('[data-paper-badge]')!.textContent = paperDefinition.name;
 
-    if (thumbnail) {
-      thumbnail.classList.add(`paper-${paperDefinition.id}`);
+    if (thumbnail && thumbnailPaper) {
+      thumbnailPaper.classList.add(`paper-${paperDefinition.id}`);
       const hand = { ...document.handwriting, fontSize: 12, lineHeight: 1.65, jitterY: 0.4, jitterRot: 0.2 };
-      Object.entries(handCssVars(hand, 8)).forEach(([name, value]) => thumbnail.style.setProperty(name, value));
+      // La hoja lleva las variables; la escritura vive dentro para que su
+      // `mix-blend-mode: multiply` se mezcle con el papel y no con la tarjeta.
+      Object.entries(handCssVars(hand, 8)).forEach(([name, value]) => thumbnailPaper.style.setProperty(name, value));
       thumbnail.innerHTML = await thumbnailHtml(document);
     }
 
