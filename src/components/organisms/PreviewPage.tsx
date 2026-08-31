@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useMemo, useRef } from 'react';
 import type { ClabethDocument } from '../../lib/types/document';
 import type { MdBlock } from '../../lib/markdown/blocks';
 import type { PaperConfig } from '../../lib/types/paper';
+import type { PreviewQuality } from '../../lib/store/ui';
 import { contentWidth, pageDimensions, usesMarginLine, PAPER_MARGIN } from '../../lib/paper/styles';
 import { handCssVars } from '../../lib/handwriting/css-vars';
 import { previewRenderKey } from '../../lib/handwriting/render-key';
@@ -17,12 +18,23 @@ export interface PreviewPageProps {
   pageIndex: number;
   totalPages: number;
   zoom?: number;
+  /** `borrador` omite el Canvas y deja la escritura del DOM a la vista. */
+  quality?: PreviewQuality;
   onRenderStateChange?: (pageIndex: number, renderKey: string, state: CanvasRenderState) => void;
 }
 
 /** Una hoja con su chrome: encabezado, pie, numeración y margen rojo. */
 export const PreviewPage = forwardRef<HTMLElement, PreviewPageProps>(function PreviewPage(
-  { document, paper: paperOverride, blocks, pageIndex, totalPages, zoom = 1, onRenderStateChange },
+  {
+    document,
+    paper: paperOverride,
+    blocks,
+    pageIndex,
+    totalPages,
+    zoom = 1,
+    quality = 'manuscrita',
+    onRenderStateChange,
+  },
   ref,
 ) {
   const paper = paperOverride ?? document.paper;
@@ -95,17 +107,19 @@ export const PreviewPage = forwardRef<HTMLElement, PreviewPageProps>(function Pr
             <MarkdownBlock key={block.key} block={block} seed={document.id} hand={document.handwriting} />
           ))}
         </div>
-        <CanvasHandwritingLayer
-          pageRef={articleRef}
-          sourceRef={contentRef}
-          width={dims.width}
-          height={dims.height}
-          seed={`${document.id}:page-${pageIndex}`}
-          renderKey={canvasRenderKey}
-          handwriting={document.handwriting}
-          paper={paper}
-          onRenderStateChange={handleCanvasRenderState}
-        />
+        {quality === 'manuscrita' && (
+          <CanvasHandwritingLayer
+            pageRef={articleRef}
+            sourceRef={contentRef}
+            width={dims.width}
+            height={dims.height}
+            seed={`${document.id}:page-${pageIndex}`}
+            renderKey={canvasRenderKey}
+            handwriting={document.handwriting}
+            paper={paper}
+            onRenderStateChange={handleCanvasRenderState}
+          />
+        )}
         {hasFooter && (
           <div className="page-footer">
             <span>{paper.footer}</span>

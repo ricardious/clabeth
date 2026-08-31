@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 
 export type PreviewMode = 'continua' | 'una' | 'dos';
+
+/**
+ * Fidelidad de la vista previa.
+ * - `manuscrita`: se dibuja el Canvas con tinta, papel y variación humana.
+ * - `borrador`: se muestra solo el DOM con las fuentes manuscritas y se omite
+ *   el Canvas, que es el paso caro (cientos de ms por hoja en cada cambio).
+ *   La exportación siempre usa `manuscrita`, sea cual sea esta preferencia.
+ */
+export type PreviewQuality = 'manuscrita' | 'borrador';
 export type InspectorTab = 'escritura' | 'papel' | 'latex' | null;
 export type MobileTab = 'escribir' | 'vista' | 'personalizar';
 
@@ -13,6 +22,7 @@ interface UiState {
   sidebarOpen: boolean;
   inspector: InspectorTab;
   previewMode: PreviewMode;
+  previewQuality: PreviewQuality;
   zoom: number;
   /** Página visible (0-based) en los modos «una» y «dos». */
   currentPage: number;
@@ -20,6 +30,7 @@ interface UiState {
   toggleSidebar: () => void;
   setInspector: (tab: InspectorTab) => void;
   setPreviewMode: (mode: PreviewMode) => void;
+  setPreviewQuality: (quality: PreviewQuality) => void;
   setZoom: (zoom: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -34,12 +45,14 @@ export const useUiStore = create<UiState>()((set) => ({
   sidebarOpen: true,
   inspector: 'escritura',
   previewMode: 'continua',
+  previewQuality: 'manuscrita',
   zoom: 1,
   currentPage: 0,
   mobileTab: 'escribir',
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setInspector: (inspector) => set({ inspector }),
   setPreviewMode: (previewMode) => set({ previewMode }),
+  setPreviewQuality: (previewQuality) => set({ previewQuality }),
   setZoom: (zoom) => set({ zoom: clampZoom(zoom) }),
   zoomIn: () => set((state) => ({ zoom: clampZoom(state.zoom + ZOOM_STEP) })),
   zoomOut: () => set((state) => ({ zoom: clampZoom(state.zoom - ZOOM_STEP) })),

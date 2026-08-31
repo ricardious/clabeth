@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, Download, FileText, PanelRight, PenLine, Sigma } from 'lucide-react';
 import { useDocumentsStore } from '../../lib/store/documents';
 import { useUiStore, type InspectorTab } from '../../lib/store/ui';
 import { useAutosave } from '../../hooks/use-autosave';
+import { useDebouncedValue } from '../../hooks/use-debounced-value';
 import { useIsMobile } from '../../hooks/use-media-query';
 import { textStats } from '../../lib/markdown/stats';
 import { previewRenderKey } from '../../lib/handwriting/render-key';
@@ -25,6 +26,14 @@ import { StatusBar } from '../organisms/StatusBar';
 import { cn } from '../../lib/utils/cn';
 import { useAppBootstrap } from '../../hooks/use-app-bootstrap';
 import { navigateTo } from '../../lib/navigation';
+
+/**
+ * Pausa tras la última tecla antes de repaginar y redibujar. Escribir cambia el
+ * contenido decenas de veces por segundo y cada pasada implica volver a partir
+ * el Markdown en bloques, medir sus alturas y repintar el Canvas de cada hoja
+ * visible. Esperar a la pausa concentra ese trabajo en una sola vez.
+ */
+const PREVIEW_DEBOUNCE_MS = 500;
 
 const INSPECTOR_TABS: { id: InspectorTab; label: string; icon: ReactNode }[] = [
   { id: 'escritura', label: 'Escritura', icon: <PenLine size={15} aria-hidden /> },
@@ -54,6 +63,8 @@ export function EditorWorkspace() {
   const setInspector = useUiStore((state) => state.setInspector);
   const previewMode = useUiStore((state) => state.previewMode);
   const setPreviewMode = useUiStore((state) => state.setPreviewMode);
+  const previewQuality = useUiStore((state) => state.previewQuality);
+  const setPreviewQuality = useUiStore((state) => state.setPreviewQuality);
   const zoom = useUiStore((state) => state.zoom);
   const currentPage = useUiStore((state) => state.currentPage);
   const setCurrentPage = useUiStore((state) => state.setCurrentPage);
@@ -73,7 +84,17 @@ export function EditorWorkspace() {
     [],
   );
 
+  // Estable a propósito: los callbacks que llegan a la vista previa acaban en
+  // las dependencias del dibujado, y uno creado en cada render la repintaría
+  // entera cada vez que este componente se vuelve a renderizar.
+  const handlePreviewRenderReady = useCallback((renderKey: string): void => {
+    setRenderingPreviewKey((current) => (current === renderKey ? null : current));
+  }, []);
+
   const doc = documents.find((d) => d.id === id);
+  // La vista previa va un paso por detrás del editor: el texto se propaga en la
+  // pausa, no en cada tecla. Al abrir otro documento se muestra al instante.
+  const previewContent = useDebouncedValue(doc?.content ?? '', PREVIEW_DEBOUNCE_MS, doc?.id);
 
   if (!loaded || !id) {
     return <div className="flex h-full items-center justify-center bg-background text-sm text-muted">Cargando documento…</div>;
@@ -90,6 +111,10 @@ export function EditorWorkspace() {
   }
 
   const stats = textStats(doc.content);
+  // Misma configuración, contenido con retardo. `handwriting` y `paper` se
+  // comparten por referencia, así que los ajustes del panel siguen aplicándose
+  // de inmediato.
+  const previewDoc = doc.content === previewContent ? doc : { ...doc, content: previewContent };
 
   const handleContent = (value: string): void => update(doc.id, { content: value });
 
@@ -103,6 +128,13 @@ export function EditorWorkspace() {
       window.cancelAnimationFrame(previewUpdateFrame.current);
       previewUpdateFrame.current = null;
     }
+
+    // Sin Canvas no hay redibujado que esperar: el cambio se ve en el acto.
+    if (previewQuality === 'borrador') {
+      apply();
+      return;
+    }
+
     setRenderingPreviewKey(previewRenderKey(handwriting, paper));
 
     if (!defer) {
@@ -196,18 +228,18 @@ export function EditorWorkspace() {
 
   const preview = (
     <PaginatedPreview
-      document={doc}
+      document={previewDoc}
       interactive
       mode={previewMode}
+      quality={previewQuality}
       zoom={zoom}
       currentPage={currentPage}
       onModeChange={setPreviewMode}
+      onQualityChange={setPreviewQuality}
       onPageChange={setCurrentPage}
       onPagesChange={setPageCount}
       renderingPreviewKey={renderingPreviewKey}
-      onPreviewRenderReady={(renderKey) =>
-        setRenderingPreviewKey((current) => (current === renderKey ? null : current))
-      }
+      onPreviewRenderReady={handlePreviewRenderReady}
     />
   );
 
