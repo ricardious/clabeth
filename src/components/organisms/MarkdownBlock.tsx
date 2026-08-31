@@ -3,7 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import type { HandwritingConfig } from '../../types/handwriting';
+import 'katex/dist/katex.min.css';
+import type { HandwritingConfig } from '../../lib/types/handwriting';
 import type { MdBlock } from '../../lib/markdown/blocks';
 import { KATEX_OPTIONS } from '../../lib/markdown/pipeline';
 import { rehypeKatexErrors } from '../../lib/markdown/rehype-katex-errors';
@@ -20,14 +21,16 @@ const REMARK_PLUGINS = [remarkGfm, remarkMath];
 
 /** Renderiza un bloque Markdown/LaTeX con la apariencia manuscrita. */
 export const MarkdownBlock = memo(function MarkdownBlock({ block, seed, hand }: MarkdownBlockProps) {
+  // Evita repetir el mismo patrón al inicio de cada bloque Markdown.
+  const blockSeed = `${seed}:${block.key}`;
   const rehypePlugins = useMemo(
     () =>
       [
         [rehypeKatex, KATEX_OPTIONS],
         rehypeKatexErrors,
-        [rehypeJitter, { seed, jitterY: hand.jitterY, jitterRot: hand.jitterRot, slant: hand.slant }],
+        [rehypeJitter, { seed: blockSeed, jitterY: hand.jitterY, jitterRot: hand.jitterRot, slant: hand.slant }],
       ] as never,
-    [seed, hand.jitterY, hand.jitterRot, hand.slant],
+    [blockSeed, hand.jitterY, hand.jitterRot, hand.slant],
   );
 
   if (block.pageBreak) return null;
