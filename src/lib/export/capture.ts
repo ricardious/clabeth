@@ -1,5 +1,5 @@
 import { domToPng } from 'modern-screenshot';
-import type { PageDimensions, PageOrientation } from '../../types/paper';
+import type { PageDimensions, PageOrientation } from '../types/paper';
 
 /** Captura un nodo de página como PNG en data URL. */
 export async function capturePageAsPng(
