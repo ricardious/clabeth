@@ -1,5 +1,7 @@
 import type { HandwritingConfig, HandwritingPreset } from '../types/handwriting';
 
+export type HandwritingStyleConfig = Omit<HandwritingConfig, 'fontId'>;
+
 export const DEFAULT_HANDWRITING: HandwritingConfig = {
   fontId: 'patrick',
   fontSize: 22,
@@ -121,4 +123,16 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
 
 export function getPreset(id: string): HandwritingPreset {
   return HANDWRITING_PRESETS.find((preset) => preset.id === id) ?? HANDWRITING_PRESETS[0];
+}
+
+/** Devuelve únicamente los ajustes de trazo del preset, sin cambiar la fuente. */
+export function getPresetStyle(id: string): HandwritingStyleConfig {
+  const { fontId: _fontId, ...style } = getPreset(id).config;
+  return style;
+}
+
+/** Comprueba el estilo visual independientemente de la fuente seleccionada. */
+export function matchesPresetStyle(config: HandwritingConfig, preset: HandwritingPreset): boolean {
+  const { fontId: _currentFontId, ...currentStyle } = config;
+  return JSON.stringify(currentStyle) === JSON.stringify(getPresetStyle(preset.id));
 }

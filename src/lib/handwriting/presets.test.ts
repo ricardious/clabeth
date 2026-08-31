@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { needsWordSpans, wordVariation } from './jitter';
 import { seededJitter } from '../utils/seeded-random';
-import { HANDWRITING_PRESETS, DEFAULT_HANDWRITING } from './presets';
+import {
+  HANDWRITING_PRESETS,
+  DEFAULT_HANDWRITING,
+  getPresetStyle,
+  matchesPresetStyle,
+} from './presets';
 import { getHandwritingFont, HANDWRITING_FONTS } from './fonts';
 import { INK_COLORS } from './inks';
 
@@ -81,6 +86,27 @@ describe('presets y catálogos', () => {
     for (const preset of HANDWRITING_PRESETS) {
       expect(preset.config.formulaStyle).toBe('manuscrita');
     }
+  });
+
+  it('separa los ajustes de estilo de la fuente', () => {
+    expect(getPresetStyle('elegante')).not.toHaveProperty('fontId');
+    expect(getPresetStyle('elegante')).toMatchObject({ inkId: 'rojo', weight: 700 });
+  });
+
+  it('permite aplicar un estilo sin reemplazar la fuente seleccionada', () => {
+    const config = { ...DEFAULT_HANDWRITING, fontId: 'give-you-glory' };
+    const result = { ...config, ...getPresetStyle('elegante') };
+
+    expect(result.fontId).toBe('give-you-glory');
+    expect(matchesPresetStyle(result, HANDWRITING_PRESETS.find((preset) => preset.id === 'elegante')!)).toBe(true);
+  });
+
+  it('reconoce un mismo estilo aunque cambie la fuente', () => {
+    const preset = HANDWRITING_PRESETS.find((candidate) => candidate.id === 'apuntes')!;
+    const config = { ...preset.config, fontId: 'reenie' };
+
+    expect(matchesPresetStyle(config, preset)).toBe(true);
+    expect(matchesPresetStyle({ ...config, opacity: 0.5 }, preset)).toBe(false);
   });
 
   it('toda fuente referenciada existe en el catálogo', () => {
