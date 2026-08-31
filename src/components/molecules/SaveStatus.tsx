@@ -1,5 +1,5 @@
 import { Check, CloudAlert } from 'lucide-react';
-import type { SaveState } from '../../types/document';
+import type { SaveState } from '../../lib/types/document';
 import { Spinner } from '../atoms/Spinner';
 
 export function SaveStatus({ state, error }: { state: SaveState; error?: string | null }) {
