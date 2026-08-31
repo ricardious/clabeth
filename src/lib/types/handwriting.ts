@@ -1,7 +1,7 @@
 /** Apariencia de las fórmulas LaTeX. */
 export type FormulaStyle = 'tipografica' | 'sutil' | 'manuscrita';
 
-/** Configación manuscrita de un documento. */
+/** Configuración manuscrita de un documento. */
 export interface HandwritingConfig {
   /** Familia manuscrita: id del catálogo (caveat, kalam, ...). */
   fontId: string;
