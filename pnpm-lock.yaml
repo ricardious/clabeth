@@ -20,6 +20,9 @@ importers:
       '@fontsource/architects-daughter':
         specifier: ^5.2.5
         version: 5.3.0
+      '@fontsource/give-you-glory':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/gochi-hand':
         specifier: ^5.3.0
         version: 5.3.0
@@ -28,6 +31,9 @@ importers:
         version: 5.3.0
       '@fontsource/instrument-sans':
         specifier: ^5.2.5
+        version: 5.3.0
+      '@fontsource/just-me-again-down-here':
+        specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/kalam':
         specifier: ^5.2.5
@@ -787,6 +793,9 @@ packages:
   '@fontsource/architects-daughter@5.3.0':
     resolution: {integrity: sha512-uezOgAlbhmf9nDW69VYq31lXNA+0uRFWXBGCSFWLXVcrNESFHpNjvu11kJss1PMsfH/YKz1hnnYB+JSNI/t+ew==}
 
+  '@fontsource/give-you-glory@5.3.0':
+    resolution: {integrity: sha512-cxsoZ0ZpXJg2zdM8qktRiZyHG1PGWXtCblIL8EIoYtZKyCggSLfFV6+LatYc78ZNFXb99l94W/3EVV6jGDwYBQ==}
+
   '@fontsource/gochi-hand@5.3.0':
     resolution: {integrity: sha512-IW6Xo3wbZuTLyx7hZzIr7+VSQwQ3oEiLZRphBnuNVaK+dhdxwYw57/r1NVi8x1ubX4OYyCG2S04mH6tLhanIsQ==}
 
@@ -795,6 +804,9 @@ packages:
 
   '@fontsource/instrument-sans@5.3.0':
     resolution: {integrity: sha512-QwXc4hb/px3XvSPS2CPAOgey8nyrQFxgxrmXQQ+pN+P51hKdAcchxpg8rSbjANFfPu6VKXhDqkVDucXMZ9CM5g==}
+
+  '@fontsource/just-me-again-down-here@5.3.0':
+    resolution: {integrity: sha512-HePfS55Wx8gjeNBbR3vac6vo/ZpDkM2gklaCX2q/wQL/raX1tw+ku7l0B8DsrSOnukoh+3ULV8yKug5e+EJchw==}
 
   '@fontsource/kalam@5.3.0':
     resolution: {integrity: sha512-FDkVoDfPDCSN/eO81FOYtUI67eMgpVBJmjBtAqSL0PmEhJyeFY2biC+CR+yEttksgXR9+swpFdYmQTyjwBq80Q==}
@@ -3835,11 +3847,15 @@ snapshots:
 
   '@fontsource/architects-daughter@5.3.0': {}
 
+  '@fontsource/give-you-glory@5.3.0': {}
+
   '@fontsource/gochi-hand@5.3.0': {}
 
   '@fontsource/ibm-plex-mono@5.3.0': {}
 
   '@fontsource/instrument-sans@5.3.0': {}
+
+  '@fontsource/just-me-again-down-here@5.3.0': {}
 
   '@fontsource/kalam@5.3.0': {}
 
