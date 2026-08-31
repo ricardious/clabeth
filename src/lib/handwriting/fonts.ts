@@ -17,6 +17,18 @@ export const HANDWRITING_FONTS: HandwritingFont[] = [
     family: "'Nothing You Could Do', cursive",
     weights: [400],
   },
+  {
+    id: 'just-me-again-down-here',
+    name: 'Just Me Again Down Here',
+    family: "'Just Me Again Down Here', cursive",
+    weights: [400],
+  },
+  {
+    id: 'give-you-glory',
+    name: 'Give You Glory',
+    family: "'Give You Glory', cursive",
+    weights: [400],
+  },
   { id: 'patrick', name: 'Patrick Hand', family: "'Patrick Hand', cursive", weights: [400] },
   { id: 'gochi', name: 'Gochi Hand', family: "'Gochi Hand', cursive", weights: [400] },
   { id: 'kalam', name: 'Kalam', family: "'Kalam', cursive", weights: [300, 400, 700] },

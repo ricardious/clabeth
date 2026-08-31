@@ -90,6 +90,17 @@ describe('presets y catálogos', () => {
     }
   });
 
+  it('incluye las alternativas manuscritas aprobadas para español', () => {
+    const fontIds = HANDWRITING_FONTS.map((font) => font.id);
+    expect(fontIds).toEqual(expect.arrayContaining([
+      'reenie',
+      'nothing-you-could-do',
+      'just-me-again-down-here',
+      'give-you-glory',
+    ]));
+    expect(fontIds).not.toContain('caveat');
+  });
+
   it('los IDs antiguos con cobertura incompleta migran a fuentes con español', () => {
     expect(getHandwritingFont('hw-1').id).toBe('patrick');
     expect(getHandwritingFont('hw-2').id).toBe('gochi');
