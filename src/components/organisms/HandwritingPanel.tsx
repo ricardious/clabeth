@@ -1,4 +1,4 @@
-import type { HandwritingConfig } from '../../types/handwriting';import { HANDWRITING_PRESETS, getPreset } from '../../lib/handwriting/presets';
+import type { HandwritingConfig } from '../../lib/types/handwriting';import { HANDWRITING_PRESETS, getPreset } from '../../lib/handwriting/presets';
 import { HANDWRITING_FONTS } from '../../lib/handwriting/fonts';
 import { INK_COLORS } from '../../lib/handwriting/inks';
 import { Select } from '../atoms/Select';
@@ -39,11 +39,16 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
         <label className="block">
           <span className="mb-1 block text-[13px] text-foreground">Fuente manuscrita</span>
           <Select value={config.fontId} onChange={(event) => onChange({ fontId: event.target.value })}>
-            {HANDWRITING_FONTS.map((font) => (
-              <option key={font.id} value={font.id}>
-                {font.name}
-              </option>
-            ))}
+            <optgroup label="Del proyecto handwriting">
+              {HANDWRITING_FONTS.filter((font) => font.id.startsWith('hw-')).map((font) => (
+                <option key={font.id} value={font.id}>{font.name}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Alternativas abiertas">
+              {HANDWRITING_FONTS.filter((font) => !font.id.startsWith('hw-')).map((font) => (
+                <option key={font.id} value={font.id}>{font.name}</option>
+              ))}
+            </optgroup>
           </Select>
         </label>
         <div>
