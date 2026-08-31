@@ -1,4 +1,4 @@
-import type { PaperConfig, PaperStyleId } from '../../types/paper';
+import type { PaperConfig, PaperStyleId } from '../../lib/types/paper';
 import { PAPER_STYLES, PAGE_SIZES, getPaperStyle } from '../../lib/paper/styles';
 import { Input } from '../atoms/Input';
 import { Select } from '../atoms/Select';
