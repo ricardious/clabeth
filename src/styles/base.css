@@ -105,3 +105,91 @@ body {
 dialog::backdrop {
   background: color-mix(in oklch, var(--foreground) 42%, transparent);
 }
+
+/* ============================================================
+   Select propio (React y Astro comparten estas reglas)
+   ------------------------------------------------------------
+   El desplegable del `<select>` nativo lo pinta el sistema operativo:
+   ignora los tokens y desentona sobre todo en tema oscuro. Aquí vive el
+   panel a medida; el nativo permanece como fuente de valor y como
+   alternativa si el script no llega a ejecutarse.
+   ============================================================ */
+
+.clabeth-select {
+  position: relative;
+}
+
+/* Sin mejorar todavía: el nativo se ve con los tokens del sistema. */
+.clabeth-select > select {
+  height: var(--control-h-md);
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  padding-inline: 10px;
+  font-size: 14px;
+  color: var(--foreground);
+}
+
+.clabeth-select[data-select-ready='true'] > select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.clabeth-listbox {
+  position: fixed;
+  inset: auto;
+  z-index: 60;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid var(--outline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: var(--shadow-pop);
+}
+
+/* El popover se apoya en la capa superior; el respaldo usa `is-open`. */
+.clabeth-listbox:not([popover]) {
+  display: none;
+}
+
+.clabeth-listbox:not([popover]).is-open {
+  display: block;
+}
+
+.clabeth-listbox svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .clabeth-listbox {
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out),
+      overlay var(--dur-fast) allow-discrete,
+      display var(--dur-fast) allow-discrete;
+  }
+
+  .clabeth-listbox:popover-open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .clabeth-listbox:popover-open {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+}
