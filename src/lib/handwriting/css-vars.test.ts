@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { HandwritingConfig } from '../../types/handwriting';
+import type { HandwritingConfig } from '../types/handwriting';
 import { handCssVars } from './css-vars';
 import { DEFAULT_HANDWRITING } from './presets';
+import { getHandwritingFont } from './fonts';
 
 const withStyle = (formulaStyle: HandwritingConfig['formulaStyle'], slant = 0): HandwritingConfig => ({
   ...DEFAULT_HANDWRITING,
@@ -13,9 +14,11 @@ const varOf = (vars: ReturnType<typeof handCssVars>, name: string): string =>
   (vars as unknown as Record<string, string>)[name];
 
 describe('handCssVars · fórmulas', () => {
+  const defaultFont = getHandwritingFont(DEFAULT_HANDWRITING.fontId).family;
+
   it('manuscrita: fuente a mano en --formula-font y sin itálica sintética', () => {
     const vars = handCssVars(withStyle('manuscrita'));
-    expect(varOf(vars, '--formula-font')).toContain('Caveat');
+    expect(varOf(vars, '--formula-font')).toBe(defaultFont);
     expect(varOf(vars, '--formula-italic')).toBe('normal');
   });
 
@@ -44,6 +47,6 @@ describe('handCssVars · fórmulas', () => {
     const legacy = { ...DEFAULT_HANDWRITING };
     delete (legacy as Partial<HandwritingConfig>).formulaStyle;
     const vars = handCssVars(legacy as HandwritingConfig);
-    expect(varOf(vars, '--formula-font')).toContain('Caveat');
+    expect(varOf(vars, '--formula-font')).toBe(defaultFont);
   });
 });
