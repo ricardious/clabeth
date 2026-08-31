@@ -1,0 +1,5 @@
+/* Clabeth · entrada portable del sistema de tokens.
+ * La fuente canónica vive en src/styles/tokens.css y se conserva compartida
+ * por la landing Astro y el editor React.
+ */
+@import './src/styles/tokens.css';
