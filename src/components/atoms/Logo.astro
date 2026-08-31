@@ -1,0 +1,13 @@
+---
+interface Props {
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { size = 'md', class: className = '' } = Astro.props;
+const sizes = { sm: 'text-lg', md: 'text-[22px]', lg: 'text-4xl' } as const;
+---
+
+<span class:list={['select-none font-display font-semibold tracking-tight text-foreground-strong', sizes[size], className]}>
+  Clabeth<span class="text-primary" aria-hidden="true">.</span>
+</span>
