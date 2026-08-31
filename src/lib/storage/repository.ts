@@ -1,4 +1,4 @@
-import type { ClabethDocument } from '../../types/document';
+import type { ClabethDocument } from '../types/document';
 
 const STORAGE_KEY = 'clabeth.library.v1';
 const CURRENT_VERSION = 1;
