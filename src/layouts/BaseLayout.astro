@@ -25,19 +25,28 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <script is:inline>
+      // Se ejecuta antes de pintar para que no haya destello de tema claro.
+      // El modo «sistema» de versiones anteriores se traduce una sola vez a lo
+      // que el sistema mostraba en ese momento.
       try {
         const key = 'clabeth.settings.v1';
         const value = JSON.parse(localStorage.getItem(key) || '{}');
         let theme = value?.state?.theme;
-        if ((value?.version ?? 0) === 0 && theme === 'system') {
-          theme = 'light';
-          value.state.theme = 'light';
-          value.version = 1;
-          localStorage.setItem(key, JSON.stringify(value));
+        if (theme !== 'light' && theme !== 'dark') {
+          theme =
+            theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+          if (value?.state) {
+            value.state.theme = theme;
+            value.version = 2;
+            localStorage.setItem(key, JSON.stringify(value));
+          }
         }
-        if (theme === 'dark') document.documentElement.dataset.theme = 'dark';
-        else if (theme !== 'system') document.documentElement.dataset.theme = 'light';
-      } catch {}
+        document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
     </script>
   </head>
   <body class={bodyClass}>

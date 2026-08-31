@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ThemeMode } from '../types/theme';
+import { resolveThemeMode, type ThemeMode } from '../types/theme';
 import type { PageSizeId, PaperStyleId } from '../types/paper';
 
 /** Preferencias reactivas compartidas por las islas React. */
@@ -29,15 +29,13 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'clabeth.settings.v1',
-      version: 1,
-      migrate: (persisted, version) => {
+      version: 2,
+      // El modo «sistema» existió hasta la versión 1. Quien lo tuviera guardado
+      // se queda con el tema que el sistema mostraba en ese momento, así que la
+      // apariencia no cambia de golpe al actualizar.
+      migrate: (persisted) => {
         const settings = persisted as SettingsState;
-        // `system` era el valor inicial de la versión 0 y hacía que el editor
-        // apareciera negro en equipos oscuros. La elección sigue disponible.
-        if (version === 0 && settings.theme === 'system') {
-          return { ...settings, theme: 'light' };
-        }
-        return settings;
+        return { ...settings, theme: resolveThemeMode(settings.theme) };
       },
     },
   ),
