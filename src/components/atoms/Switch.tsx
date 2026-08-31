@@ -31,7 +31,9 @@ export function Switch({ label, checked, onChange, disabled }: SwitchProps) {
       >
         <span
           className={cn(
-            'absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-[left] duration-[var(--dur-fast)]',
+            // La perilla usa su propio token: en tema oscuro `bg-surface` era
+            // más oscura que el carril y el interruptor parecía invertido.
+            'absolute top-0.5 h-4 w-4 rounded-full bg-knob shadow transition-[left] duration-[var(--dur-fast)]',
             checked ? 'left-[18px]' : 'left-0.5',
           )}
         />
