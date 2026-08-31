@@ -1,5 +1,4 @@
-import type { CSSProperties } from 'react';
-import type { HandwritingConfig } from '../../types/handwriting';
+import type { HandwritingConfig } from '../types/handwriting';
 import { getHandwritingFont } from './fonts';
 import { getInk } from './inks';
 
@@ -15,7 +14,7 @@ function formulaSlantDeg(slant: number): number {
  * muestras de tinta/fuente) donde se asignan estilos inline, tal como
  * permite la especificación: variables relacionadas con escritura y papel.
  */
-export function handCssVars(hand: HandwritingConfig, contentTopPx = 0): CSSProperties {
+export function handCssVars(hand: HandwritingConfig, contentTopPx = 0): Record<string, string> {
   const lineHeightPx = hand.fontSize * hand.lineHeight;
   const slantClamped = formulaSlantDeg(hand.slant);
 
@@ -51,5 +50,5 @@ export function handCssVars(hand: HandwritingConfig, contentTopPx = 0): CSSPrope
     '--_line-offset': `${contentTopPx + lineHeightPx * 0.85}px`,
     '--_grid': `${Math.round(hand.fontSize * 1.45)}px`,
   };
-  return vars as CSSProperties;
+  return vars;
 }
