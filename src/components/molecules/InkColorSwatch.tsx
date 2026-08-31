@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import type { InkColor } from '../../types/handwriting';
+import type { InkColor } from '../../lib/types/handwriting';
 import { cn } from '../../lib/utils/cn';
 
 export interface InkColorSwatchProps {
