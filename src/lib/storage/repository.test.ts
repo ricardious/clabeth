@@ -5,7 +5,7 @@ import {
   loadLibrary,
   saveLibrary,
 } from './repository';
-import type { ClabethDocument } from '../../types/document';
+import type { ClabethDocument } from '../types/document';
 import { createDocument } from '../defaults';
 
 const makeDoc = (overrides: Partial<ClabethDocument> = {}): ClabethDocument => ({
