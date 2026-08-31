@@ -1,6 +1,7 @@
 import type { HandwritingConfig } from './handwriting';
 import type { PaperConfig } from './paper';
 
+/** Documento persistido por Clabeth. */
 export interface ClabethDocument {
   id: string;
   title: string;
