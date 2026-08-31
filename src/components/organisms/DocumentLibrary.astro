@@ -1,5 +1,6 @@
 ---
 import { Copy, FilePlus, Files, Pencil, Search, SearchX, Trash2, X } from '@lucide/astro';
+import Select from '../atoms/Select.astro';
 import { PAPER_STYLES } from '../../lib/paper/styles';
 ---
 
@@ -22,15 +23,15 @@ import { PAPER_STYLES } from '../../lib/paper/styles';
       </button>
     </div>
     <div class="flex gap-2">
-      <select data-library-sort aria-label="Ordenar documentos" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+      <Select class="w-44" data-library-sort aria-label="Ordenar documentos">
         <option value="actualizado">Más recientes</option>
         <option value="creado">Más antiguos</option>
         <option value="titulo">Título</option>
-      </select>
-      <select data-library-paper aria-label="Filtrar por tipo de papel" class="h-[var(--control-h-md)] w-full rounded-md border border-outline bg-surface px-2.5 text-sm text-foreground">
+      </Select>
+      <Select class="w-48" data-library-paper aria-label="Filtrar por tipo de papel">
         <option value="todos">Todos los papeles</option>
         {PAPER_STYLES.map((style) => <option value={style.id}>{style.name}</option>)}
-      </select>
+      </Select>
     </div>
     <p data-library-count class="text-xs tabular-nums text-muted" aria-live="polite">0 documentos</p>
   </div>
