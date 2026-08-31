@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useDocumentsStore } from '../store/documents';
+import { useDocumentsStore } from '../lib/store/documents';
 
 export const AUTOSAVE_DELAY = 900;
 
