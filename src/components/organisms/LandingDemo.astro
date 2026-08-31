@@ -1,0 +1,258 @@
+---
+import { ArrowDown, ArrowRight } from '@lucide/astro';
+import { DEFAULT_HANDWRITING } from '../../lib/handwriting/presets';
+import { handCssVars } from '../../lib/handwriting/css-vars';
+import { renderMarkdown } from '../../lib/markdown/render';
+
+const demoContent = `## Cómo funciona
+
+Escribe **Markdown** aquí y mira la hoja de la derecha. La energía se expresa como $E = mc^2$.
+
+$$
+f'(x) = \\lim_{h \\to 0} \\frac{f(x+h)-f(x)}{h}
+$$
+
+- [x] Markdown a escritura manuscrita
+- [ ] Fórmulas LaTeX precisas
+- [ ] Exportar a PDF`;
+const demoHand = { ...DEFAULT_HANDWRITING, fontSize: 21, jitterY: 1.2, jitterRot: 0.5 };
+const rendered = await renderMarkdown(demoContent, 'landing', demoHand);
+const style = Object.entries({
+  '--_page-w': '100%',
+  '--_page-h': '320px',
+  ...handCssVars(demoHand, 24),
+  '--_line-offset': '26px',
+}).map(([name, value]) => `${name}:${value}`).join(';');
+---
+
+<div class="landing-demo">
+  <div class="landing-demo-editor">
+    <div class="landing-demo-label">
+      <label for="landing-markdown">Escribe Markdown</label>
+      <span>apuntes.md</span>
+    </div>
+    <textarea
+      id="landing-markdown"
+      data-demo-input
+      aria-label="Demo: escribe tu Markdown"
+      spellcheck="false"
+      class="landing-demo-input editor-textarea"
+    >{demoContent}</textarea>
+  </div>
+
+  <div class="landing-demo-connector" aria-hidden="true">
+    <span>se convierte</span>
+    <ArrowRight class="landing-arrow-right" size={22} />
+    <ArrowDown class="landing-arrow-down" size={22} />
+  </div>
+
+  <figure class="landing-demo-preview">
+    <figcaption>Vista previa · página 1</figcaption>
+    <div data-demo-page class="page paper-libreta has-margin-line w-full rounded-lg" style={style}>
+      <div class="page-margin-line" aria-hidden="true"></div>
+      <div data-demo-output class="landing-demo-content page-content hand-scope canvas-handwriting-source" set:html={rendered}></div>
+      <canvas data-demo-canvas class="handwriting-canvas" aria-hidden="true"></canvas>
+    </div>
+  </figure>
+</div>
+
+<script>
+  import { mountStaticCanvasPreview } from '../../lib/handwriting/static-canvas-preview';
+
+  window.document.querySelectorAll<HTMLElement>('.landing-demo').forEach((demo) => {
+    const input = demo.querySelector<HTMLTextAreaElement>('[data-demo-input]');
+    const output = demo.querySelector<HTMLElement>('[data-demo-output]');
+    const page = demo.querySelector<HTMLElement>('[data-demo-page]');
+    const canvas = demo.querySelector<HTMLCanvasElement>('[data-demo-canvas]');
+    if (!input || !output || !page || !canvas) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      let revision = 0;
+      let canvasPreview: ReturnType<typeof mountStaticCanvasPreview> | undefined;
+
+      void import('../../lib/handwriting/presets').then(({ DEFAULT_HANDWRITING }) => {
+        const hand = { ...DEFAULT_HANDWRITING, fontSize: 21, jitterY: 1.2, jitterRot: 0.5 };
+        canvasPreview = mountStaticCanvasPreview({
+          page,
+          source: output,
+          canvas,
+          seed: 'landing',
+          handwriting: hand,
+          paperStyle: 'libreta',
+        });
+      });
+
+      input.addEventListener('input', async () => {
+        const currentRevision = ++revision;
+        const content = input.value;
+        if (content.trim() === '') {
+          output.replaceChildren(Object.assign(window.document.createElement('p'), {
+            className: 'text-muted',
+            textContent: 'Escribe a la izquierda y tu hoja aparecerá aquí.',
+          }));
+          await canvasPreview?.render();
+          return;
+        }
+        const [{ renderMarkdown }, { DEFAULT_HANDWRITING }] = await Promise.all([
+          import('../../lib/markdown/render'),
+          import('../../lib/handwriting/presets'),
+        ]);
+        const hand = { ...DEFAULT_HANDWRITING, fontSize: 21, jitterY: 1.2, jitterRot: 0.5 };
+        const html = await renderMarkdown(content, 'landing', hand);
+        if (revision === currentRevision) {
+          output.innerHTML = html;
+          await canvasPreview?.render();
+        }
+      });
+    }, { rootMargin: '200px' });
+    observer.observe(demo);
+  });
+</script>
+
+<style>
+  /* Hallmark · component: live workbench · genre: playful · theme: Hum adapted */
+  .landing-demo {
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) auto minmax(0, 1.12fr);
+    gap: clamp(1rem, 3vw, 2rem);
+    align-items: center;
+  }
+
+  .landing-demo-editor,
+  .landing-demo-preview {
+    min-width: 0;
+  }
+
+  .landing-demo-editor {
+    overflow: hidden;
+    border: 1px solid var(--outline-strong);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .landing-demo-label {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-inline: 1rem;
+    border-block-end: 1px solid var(--outline);
+    color: var(--foreground-strong);
+  }
+
+  .landing-demo-label label {
+    font-weight: 700;
+  }
+
+  .landing-demo-label span,
+  .landing-demo-preview figcaption,
+  .landing-demo-connector span {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .landing-demo-label span {
+    font-family: var(--font-mono);
+  }
+
+  .landing-demo-input {
+    display: block;
+    width: 100%;
+    min-height: 20rem;
+    resize: vertical;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-radius: 0;
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+    background: var(--surface);
+    color: var(--foreground);
+    padding: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.75;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .landing-demo-input:hover {
+    background: color-mix(in oklch, var(--panel) 45%, var(--surface));
+  }
+
+  .landing-demo-input:focus-visible {
+    outline-color: var(--focus-ring);
+  }
+
+  .landing-demo-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .landing-demo-input[aria-invalid='true'] {
+    border-color: var(--error);
+  }
+
+  .landing-demo-input[data-state='success'] {
+    border-color: var(--success);
+  }
+
+  .landing-demo-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    transform: rotate(-3deg);
+  }
+
+  .landing-arrow-down {
+    display: none;
+  }
+
+  .landing-demo-preview figcaption {
+    margin-block-end: 0.6rem;
+    text-align: end;
+  }
+
+  .landing-demo-preview .page {
+    border: 1px solid var(--outline);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-page);
+  }
+
+  @media (max-width: 59.99rem) {
+    .landing-demo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .landing-demo-connector {
+      flex-direction: row;
+      justify-content: center;
+      transform: rotate(0);
+    }
+
+    .landing-arrow-right {
+      display: none;
+    }
+
+    .landing-arrow-down {
+      display: block;
+    }
+  }
+
+  @media (max-width: 39.99rem) {
+    .landing-demo-input {
+      min-height: 17rem;
+      font-size: 0.78rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-demo-input {
+      transition-duration: 0.01ms;
+    }
+  }
+</style>
