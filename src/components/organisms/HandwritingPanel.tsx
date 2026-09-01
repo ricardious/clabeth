@@ -6,7 +6,7 @@ import {
   matchesPresetStyle,
 } from '../../lib/handwriting/presets';
 import { HANDWRITING_FONTS } from '../../lib/handwriting/fonts';
-import { INK_COLORS } from '../../lib/handwriting/inks';
+import { INK_COLORS, getHeadingInkId } from '../../lib/handwriting/inks';
 import { Select, type SelectItem } from '../atoms/Select';
 import { Slider } from '../atoms/Slider';
 import { Separator } from '../atoms/Separator';
@@ -82,8 +82,8 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
           />
         </div>
         <div>
-          <span className="mb-1.5 block text-[13px] text-foreground">Color de tinta</span>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Color de tinta">
+          <span className="mb-1.5 block text-[13px] text-foreground">Tinta del texto</span>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tinta del texto">
             {INK_COLORS.map((ink) => (
               <InkColorSwatch
                 key={ink.id}
@@ -93,6 +93,23 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
               />
             ))}
           </div>
+        </div>
+        <div>
+          <span className="mb-1.5 block text-[13px] text-foreground">Tinta de los títulos</span>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tinta de los títulos">
+            {INK_COLORS.map((ink) => (
+              <InkColorSwatch
+                key={ink.id}
+                ink={ink}
+                selected={getHeadingInkId(config) === ink.id}
+                onSelect={(headingInkId) => onChange({ headingInkId })}
+              />
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">
+            Se aplica a los encabezados de cualquier nivel. Los documentos sin
+            elección propia usan la tinta del texto.
+          </p>
         </div>
       </section>
 

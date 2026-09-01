@@ -154,7 +154,13 @@ export function EditorWorkspace() {
 
   const handleHandwriting = (patch: Partial<HandwritingConfig>): void => {
     const handwriting = { ...doc.handwriting, ...patch };
-    const discrete = patch.fontId !== undefined || patch.inkId !== undefined || patch.formulaStyle !== undefined;
+    // Cambios de un solo clic que obligan a repintar la hoja entera: se
+    // aplazan un par de cuadros para que primero se pinte el aviso de espera.
+    const discrete =
+      patch.fontId !== undefined ||
+      patch.inkId !== undefined ||
+      patch.headingInkId !== undefined ||
+      patch.formulaStyle !== undefined;
     applyVisualChange(
       handwriting,
       doc.paper,
