@@ -27,6 +27,31 @@ beforeAll(() => {
 beforeEach(() => drawn.mockClear());
 
 describe('PreviewPage · redibujado', () => {
+  it('pinta sin espera la primera vez, y agrupa los cambios posteriores', async () => {
+    const schedule = vi.spyOn(window, 'setTimeout');
+    const delays = (): number[] =>
+      schedule.mock.calls.map((call) => call[1]).filter((d): d is number => d === 0 || d === 70);
+
+    const { rerender } = render(
+      <PreviewPage document={doc} blocks={blocks} pageIndex={0} totalPages={1} />,
+    );
+    await waitFor(() => expect(drawn).toHaveBeenCalledTimes(1));
+
+    // Al montar una hoja no hay nada que agrupar: se pinta ya. Ocurre al volver
+    // a la vista continua y al pasar de página, que es cuando se notaba.
+    expect(delays()[0]).toBe(0);
+
+    schedule.mockClear();
+    const restyled = { ...doc, handwriting: { ...doc.handwriting, inkId: 'azul' } };
+    rerender(<PreviewPage document={restyled} blocks={blocks} pageIndex={0} totalPages={1} />);
+    await waitFor(() => expect(drawn).toHaveBeenCalledTimes(2));
+
+    // Ya pintada: un cambio de configuración sí espera, para que arrastrar un
+    // deslizador no dispare una pintada por cada paso.
+    expect(delays()[0]).toBe(70);
+    schedule.mockRestore();
+  });
+
   it('no vuelve a dibujar cuando solo cambia la identidad del callback', async () => {
     const { rerender } = render(
       <PreviewPage

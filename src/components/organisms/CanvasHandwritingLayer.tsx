@@ -7,6 +7,9 @@ import { renderHandwritingCanvas } from '../../lib/handwriting/canvas-renderer';
 
 export type CanvasRenderState = 'scheduled' | 'rendering' | 'ready' | 'error';
 
+/** Espera para agrupar cambios seguidos sobre una hoja que ya está pintada. */
+const DEBOUNCE_MS = 70;
+
 interface CanvasHandwritingLayerProps {
   pageRef: RefObject<HTMLElement | null>;
   sourceRef: RefObject<HTMLDivElement | null>;
@@ -48,6 +51,10 @@ export function CanvasHandwritingLayer({
     notifyRef.current = onRenderStateChange;
   });
   const notify = (state: CanvasRenderState): void => notifyRef.current?.(state);
+
+  // Sobrevive a las re-ejecuciones del efecto, no al desmontaje: distingue la
+  // primera pintada de esta hoja de un cambio posterior de configuración.
+  const hasDrawn = useRef(false);
 
   useLayoutEffect(() => {
     let disposed = false;
@@ -91,6 +98,7 @@ export function CanvasHandwritingLayer({
               },
             });
             if (!disposed) {
+              hasDrawn.current = true;
               canvas.dataset.renderState = 'ready';
               canvas.dataset.renderMs = metrics.durationMs.toFixed(1);
               canvas.dataset.glyphCount = String(metrics.glyphCount);
@@ -111,12 +119,17 @@ export function CanvasHandwritingLayer({
       });
     };
 
-    // Un pequeño debounce evita repintar una página completa por cada tecla.
-    timer = window.setTimeout(() => void draw(), 70);
+    // El debounce agrupa cambios seguidos sobre una hoja ya pintada (arrastrar
+    // un deslizador de trazo). En la primera pintada no hay nada que agrupar y
+    // esperar solo alarga el rato en que se ve el DOM sin tinta: ocurre cada
+    // vez que una hoja se monta, que es lo que pasa al volver a la vista
+    // continua o al pasar de página.
+    const delay = hasDrawn.current ? DEBOUNCE_MS : 0;
+    timer = window.setTimeout(() => void draw(), delay);
     const observer = new ResizeObserver(() => {
       window.clearTimeout(timer);
       window.cancelAnimationFrame(frame);
-      timer = window.setTimeout(() => void draw(), 70);
+      timer = window.setTimeout(() => void draw(), DEBOUNCE_MS);
     });
     observer.observe(source);
 
