@@ -12,28 +12,32 @@ texto plano, personaliza papel, letra y tinta, y exporta a PDF o PNG.
   </a>
 </p>
 
-<p align="center">
-  Próximamente en <a href="https://clabeth.ricardious.dev">clabeth.ricardious.dev</a>
-</p>
+## Usar Clabeth
 
-## Requisitos
+### 1. En la web
 
-- Node.js ≥ 22.12
+**Próximamente en [clabeth.ricardious.dev](https://clabeth.ricardious.dev).**
 
-## Puesta en marcha
+Será la forma más sencilla de usar Clabeth: sin instalaciones y directamente
+desde el navegador.
+
+### 2. Ejecutarla localmente
+
+Como alternativa, puedes correr la aplicación en tu equipo. Necesitas
+Node.js 22.12 o posterior y pnpm.
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Abre <http://localhost:4321>. La portada incluye una demo funcional;
-«Empezar a escribir» crea un documento de bienvenida.
+Después abre <http://localhost:4321>. La portada incluye una demostración
+funcional y «Empezar a escribir» crea un documento de bienvenida.
 
-## Comandos
+## Desarrollo
 
-| Comando             | Acción                                    |
-| ------------------- | ----------------------------------------- |
+| Comando          | Acción                                    |
+| ---------------- | ----------------------------------------- |
 | `pnpm dev`       | Servidor de desarrollo                    |
 | `pnpm typecheck` | `astro check` (Astro + TypeScript)        |
 | `pnpm test`      | Vitest + React Testing Library            |
