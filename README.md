@@ -107,3 +107,10 @@ src/
   el bloque siguiente.
 - La exportación captura los mismos nodos de página de la vista previa
   (fuentes y fondo incluidos) y arma PDF con jsPDF.
+
+## Autoría y licencia
+
+Clabeth fue creado por
+[Alex Ricardo Castañeda Rodríguez](https://github.com/ricardious).
+
+Este proyecto se distribuye bajo la [licencia MIT](LICENSE).
