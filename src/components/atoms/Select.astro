@@ -71,7 +71,7 @@ const { class: className = '', size = 'md', ...rest } = Astro.props;
     trigger.setAttribute('aria-expanded', 'false');
     trigger.setAttribute('aria-controls', listboxId);
     trigger.className = `${TRIGGER_BASE} ${TRIGGER_SIZE[size]}`;
-    trigger.innerHTML = `<span data-select-value class="min-w-0 flex-1 truncate"></span><span data-select-chevron class="shrink-0 text-muted transition-transform duration-[var(--dur-fast)] ${size === 'sm' ? 'size-3.5' : 'size-4'}">${CHEVRON}</span>`;
+    trigger.innerHTML = `<span data-select-value class="min-w-0 flex-1 truncate"></span><span data-select-chevron class="clabeth-select-icon shrink-0 text-muted transition-transform duration-[var(--dur-fast)] ${size === 'sm' ? 'size-3.5' : 'size-4'}">${CHEVRON}</span>`;
 
     const listbox = window.document.createElement('div');
     listbox.id = listboxId;
@@ -153,7 +153,9 @@ const { class: className = '', size = 'md', ...rest } = Astro.props;
           .filter(Boolean)
           .join(' ');
         element.innerHTML = `<span class="min-w-0 flex-1 truncate"></span>${
-          isSelected ? `<span class="mt-0.5 size-3.5 shrink-0 text-primary">${CHECK}</span>` : ''
+          isSelected
+            ? `<span class="clabeth-select-icon mt-0.5 size-3.5 shrink-0 text-primary">${CHECK}</span>`
+            : ''
         }`;
         element.querySelector('span')!.textContent = option.label;
         element.addEventListener('pointerenter', () => {

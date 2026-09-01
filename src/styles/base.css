@@ -167,7 +167,12 @@ dialog::backdrop {
   display: block;
 }
 
-.clabeth-listbox svg {
+/* Solo los iconos que el Select de Astro inserta como SVG en crudo, que no
+   traen width/height propios. Marcar la clase a mano es imprescindible: una
+   regla sobre todo `svg` alcanzaría también a los iconos de lucide del Select
+   de React, cuyo width/height sí vienen puestos, y `width: 100%` los estiraría
+   al ancho completo de su contenedor flex. */
+.clabeth-select-icon svg {
   width: 100%;
   height: 100%;
 }
