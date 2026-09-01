@@ -2,8 +2,6 @@ import type { HandwritingFont } from '../types/handwriting';
 
 export const HANDWRITING_FONTS: HandwritingFont[] = [
   { id: 'hw-3', name: 'Manuscrita 3 · Royston', family: "'HW-3', cursive", weights: [400] },
-  { id: 'hw-4', name: 'Manuscrita 4 · Pam', family: "'HW-4', cursive", weights: [400] },
-  { id: 'hw-7', name: 'Manuscrita 7 · Herbert', family: "'HW-7', cursive", weights: [400] },
   {
     id: 'playwrite-es',
     name: 'Playwrite España',
@@ -48,10 +46,17 @@ export const HANDWRITING_FONTS: HandwritingFont[] = [
 export function getHandwritingFont(id: string): HandwritingFont {
   // Conservamos IDs retirados para que documentos guardados migren a una
   // fuente con español completo sin perder su configuración.
+  //
+  // hw-4 y hw-7 traían los glifos acentuados injertados de otra fuente: el
+  // cuerpo de «á» estaba dibujado 2,1× y 3,4× más grueso que su propia «a»
+  // (en las bien construidas la acentuada reutiliza el contorno exacto de la
+  // base, 1,00×). Se retiraron por eso, no por falta de glifos.
   if (id === 'hw-1') return HANDWRITING_FONTS.find((font) => font.id === 'patrick')!;
   if (id === 'hw-2') return HANDWRITING_FONTS.find((font) => font.id === 'gochi')!;
   if (id === 'hw-5') return HANDWRITING_FONTS.find((font) => font.id === 'gochi')!;
   if (id === 'hw-6') return HANDWRITING_FONTS.find((font) => font.id === 'playwrite-es')!;
+  if (id === 'hw-4') return HANDWRITING_FONTS.find((font) => font.id === 'nothing-you-could-do')!;
+  if (id === 'hw-7') return HANDWRITING_FONTS.find((font) => font.id === 'give-you-glory')!;
   if (id === 'hw-8') return HANDWRITING_FONTS.find((font) => font.id === 'patrick')!;
   if (id === 'hw-9' || id === 'caveat') {
     return HANDWRITING_FONTS.find((font) => font.id === 'reenie')!;
