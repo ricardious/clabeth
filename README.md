@@ -9,21 +9,9 @@ texto plano, personaliza papel, letra y tinta, y exporta a PDF o PNG.
 ## Video promocional
 
 <p align="center">
-  <video
-    src="docs/assets/clabeth-promo.mp4"
-    poster="docs/assets/clabeth-promo-cover.png"
-    width="900"
-    controls
-    muted
-    playsinline
-    preload="metadata"
-  >
-    Tu navegador no puede reproducir este video.
-  </video>
-</p>
-
-<p align="center">
-  <a href="docs/assets/clabeth-promo.mp4">▶ Ver el video promocional de 30 segundos</a>
+  <a href="docs/assets/clabeth-promo.mp4">
+    <img src="docs/assets/clabeth-promo-preview.gif" alt="Video promocional de Clabeth" width="900">
+  </a>
 </p>
 
 ## Requisitos
