@@ -11,6 +11,7 @@ export const DEFAULT_HANDWRITING: HandwritingConfig = {
   slant: 0,
   weight: 400,
   inkId: 'grafito',
+  headingInkId: 'grafito',
   opacity: 0.92,
   jitterY: 1,
   jitterRot: 0.4,
@@ -37,6 +38,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       slant: 0,
       weight: 400,
       inkId: 'azul',
+      headingInkId: 'azul',
       opacity: 0.95,
       jitterY: 1.4,
       jitterRot: 0.7,
@@ -56,6 +58,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       slant: 0,
       weight: 400,
       inkId: 'grafito',
+      headingInkId: 'grafito',
       opacity: 0.92,
       jitterY: 0.5,
       jitterRot: 0.2,
@@ -75,6 +78,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       slant: -2,
       weight: 400,
       inkId: 'azul',
+      headingInkId: 'azul',
       opacity: 0.96,
       jitterY: 1,
       jitterRot: 0.5,
@@ -94,6 +98,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       slant: 0,
       weight: 400,
       inkId: 'grafito',
+      headingInkId: 'grafito',
       opacity: 0.94,
       jitterY: 0.7,
       jitterRot: 0.35,
@@ -113,6 +118,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
       slant: -1.5,
       weight: 700,
       inkId: 'rojo',
+      headingInkId: 'rojo',
       opacity: 0.95,
       jitterY: 0.8,
       jitterRot: 0.4,
@@ -131,8 +137,25 @@ export function getPresetStyle(id: string): HandwritingStyleConfig {
   return style;
 }
 
+/**
+ * Rellena los campos que los documentos antiguos no tienen, para poder
+ * compararlos con un preset sin que la ausencia cuente como diferencia.
+ */
+function normalizeStyle(style: HandwritingStyleConfig): HandwritingStyleConfig {
+  return {
+    ...style,
+    headingInkId: style.headingInkId ?? style.inkId,
+    formulaStyle: style.formulaStyle ?? 'manuscrita',
+  };
+}
+
 /** Comprueba el estilo visual independientemente de la fuente seleccionada. */
 export function matchesPresetStyle(config: HandwritingConfig, preset: HandwritingPreset): boolean {
   const { fontId: _currentFontId, ...currentStyle } = config;
-  return JSON.stringify(currentStyle) === JSON.stringify(getPresetStyle(preset.id));
+  const keys = Object.keys(normalizeStyle(getPresetStyle(preset.id))).sort();
+  const pick = (style: HandwritingStyleConfig): unknown[] => {
+    const normalized = normalizeStyle(style) as Record<string, unknown>;
+    return keys.map((key) => normalized[key]);
+  };
+  return JSON.stringify(pick(currentStyle)) === JSON.stringify(pick(getPresetStyle(preset.id)));
 }

@@ -296,6 +296,13 @@
   font-weight: 700;
   line-height: 1.3;
   margin: 0.55em 0 0.2em;
+  /* Los títulos pueden llevar su propia tinta. Se redefine `--hand-ink` en vez
+     de solo el color: así el sangrado de `.jw` y el id que lee el motor Canvas
+     cambian con ella, sin repetir la regla en cada sitio. `color` sí hay que
+     volver a declararlo, porque se heredó ya calculado del ancestro. */
+  --hand-ink: var(--hand-heading-ink, var(--ink-grafito));
+  --hand-ink-id: var(--hand-heading-ink-id);
+  color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
 }
 
 .hand-scope h1 {

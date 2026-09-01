@@ -79,7 +79,15 @@ describe('presets y catálogos', () => {
   });
 
   it('el preset por defecto está completo', () => {
-    expect(Object.keys(DEFAULT_HANDWRITING)).toHaveLength(12);
+    expect(Object.keys(DEFAULT_HANDWRITING)).toHaveLength(13);
+  });
+
+  it('cada preset fija la tinta de los títulos', () => {
+    const catalogue = new Set(INK_COLORS.map((ink) => ink.id));
+    for (const preset of HANDWRITING_PRESETS) {
+      expect(preset.config.headingInkId, preset.name).toBeDefined();
+      expect(catalogue, preset.name).toContain(preset.config.headingInkId!);
+    }
   });
 
   it('todos los presets usan fórmulas manuscritas por defecto', () => {
