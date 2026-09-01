@@ -695,6 +695,13 @@ const primaryButton = 'open-clabeth landing-button inline-flex items-center just
     }
 
     .landing-preset-row strong {
+      /* Misma razón que en las tarjetas del editor: la tinta necesita papel
+         debajo. En tema claro el papel apenas se distingue del fondo; en
+         oscuro es lo que hace legible la muestra. */
+      justify-self: start;
+      background: var(--paper);
+      padding: 0.08em 0.3em;
+      border-radius: 5px;
       color: var(--preset-ink);
       font-family: var(--preset-font);
       font-size: clamp(1.35rem, 2.5vw, 2rem);
