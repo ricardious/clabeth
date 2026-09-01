@@ -126,6 +126,10 @@ describe('presets y catálogos', () => {
     ]));
     expect(fontIds).not.toContain('caveat');
     expect(fontIds).not.toContain('kalam');
+    // Retiradas: sus glifos acentuados venían de otra fuente y el cuerpo de la
+    // letra salía 2–3,4× más grueso que en su versión sin tilde.
+    expect(fontIds).not.toContain('hw-4');
+    expect(fontIds).not.toContain('hw-7');
   });
 
   it('los IDs retirados migran a fuentes aprobadas para español', () => {
@@ -133,6 +137,8 @@ describe('presets y catálogos', () => {
     expect(getHandwritingFont('hw-2').id).toBe('gochi');
     expect(getHandwritingFont('hw-5').id).toBe('gochi');
     expect(getHandwritingFont('hw-6').id).toBe('playwrite-es');
+    expect(getHandwritingFont('hw-4').id).toBe('nothing-you-could-do');
+    expect(getHandwritingFont('hw-7').id).toBe('give-you-glory');
     expect(getHandwritingFont('hw-8').id).toBe('patrick');
     expect(getHandwritingFont('hw-9').id).toBe('reenie');
     expect(getHandwritingFont('caveat').id).toBe('reenie');

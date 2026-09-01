@@ -67,7 +67,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Cursiva',
     description: 'Caligrafía enlazada de cuaderno personal.',
     config: {
-      fontId: 'hw-4',
+      fontId: 'nothing-you-could-do',
       fontSize: 21,
       lineHeight: 2.0,
       letterSpacing: 0,
@@ -105,7 +105,7 @@ export const HANDWRITING_PRESETS: HandwritingPreset[] = [
     name: 'Elegante',
     description: 'Pluma firme y tinta roja: la firma de la casa.',
     config: {
-      fontId: 'hw-7',
+      fontId: 'give-you-glory',
       fontSize: 24,
       lineHeight: 1.95,
       letterSpacing: 0.3,
