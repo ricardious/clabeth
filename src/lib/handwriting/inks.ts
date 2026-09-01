@@ -1,4 +1,4 @@
-import type { InkColor } from '../types/handwriting';
+import type { HandwritingConfig, InkColor } from '../types/handwriting';
 
 export const INK_COLORS: InkColor[] = [
   { id: 'grafito', name: 'Grafito', token: '--ink-grafito' },
@@ -11,4 +11,12 @@ export const INK_COLORS: InkColor[] = [
 
 export function getInk(id: string): InkColor {
   return INK_COLORS.find((ink) => ink.id === id) ?? INK_COLORS[0];
+}
+
+/**
+ * Tinta de los títulos. Sin elección propia —documentos anteriores al campo—
+ * se usa la del texto, así que su aspecto se conserva intacto.
+ */
+export function getHeadingInkId(config: Pick<HandwritingConfig, 'inkId' | 'headingInkId'>): string {
+  return config.headingInkId ?? config.inkId;
 }

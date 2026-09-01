@@ -139,9 +139,37 @@ function drawWeightedGlyph(
   }
 }
 
+/**
+ * Métricas verticales de la *fuente*, no de la tinta del carácter medido.
+ *
+ * Es la diferencia entre `fontBoundingBox*` y `actualBoundingBox*`, y con
+ * `actualBoundingBox*` la línea base salía distinta para cada letra: la caja de
+ * tinta de una `á` sobresale más que la de una `a` por la tilde, así que la
+ * acentuada se dibujaba más abajo (hasta 7 px a 22 px de tamaño en el caso de
+ * `Á`). Las letras acentuadas se hundían bajo el renglón y los ascendentes
+ * flotaban por encima.
+ *
+ * `fontBoundingBox*` depende solo de la fuente y el tamaño, así que todos los
+ * caracteres de una línea comparten línea base, que es lo que significa una
+ * línea base. La variación manuscrita la aporta el jitter con semilla, no un
+ * accidente de la métrica.
+ *
+ * Los valores de reserva cubren los motores sin `fontBoundingBox*`: son
+ * constantes, así que mantienen la propiedad importante de ser iguales para
+ * todos los caracteres.
+ */
+export function fontVerticalMetrics(
+  metrics: TextMetrics,
+  fontSize: number,
+): { ascent: number; descent: number } {
+  return {
+    ascent: metrics.fontBoundingBoxAscent || fontSize * 0.78,
+    descent: metrics.fontBoundingBoxDescent || fontSize * 0.2,
+  };
+}
+
 function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasConfig, rng: () => number): void {
   const preset = PRESETS[config.realismLevel];
-  const ink = getCanvasInk(config.handwriting.inkId);
   const noise = new NoiseStrategy(rng);
   const userJitter = Math.max(0.35, Math.min(1.4, config.handwriting.jitterY || 0.35));
   const baselineRange = preset.baseline * preset.intensity * userJitter;
@@ -153,17 +181,33 @@ function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasCon
   context.textAlign = 'left';
   context.textBaseline = 'alphabetic';
   context.globalCompositeOperation = 'multiply';
-  context.globalAlpha = ink.opacity * config.handwriting.opacity * (1 - ink.roughness * 0.1 - ink.absorption * 0.05);
-  context.shadowColor = `rgba(0, 0, 0, ${Math.min(0.15, ink.bleed * 0.2)})`;
-  context.shadowBlur = Math.max(0.55, ink.absorption * 2, ink.bleed * 1.5);
   context.shadowOffsetX = 0.5;
   context.shadowOffsetY = 0.5;
 
+  /**
+   * Cada glifo trae su tinta, que puede no ser la del texto: los títulos usan
+   * la suya. No basta con cambiar el color, porque el perfil lleva también cómo
+   * se comporta esa tinta (sangrado, absorción, aspereza). Los glifos llegan en
+   * orden del documento, así que los títulos van agrupados y el estado del
+   * contexto cambia unas pocas veces por hoja.
+   */
+  let ink = getCanvasInk(config.glyphs[0]?.inkId ?? config.handwriting.inkId);
+  let currentInkId: string | null = null;
+  const useInk = (inkId: string): void => {
+    if (inkId === currentInkId) return;
+    currentInkId = inkId;
+    ink = getCanvasInk(inkId);
+    context.globalAlpha =
+      ink.opacity * config.handwriting.opacity * (1 - ink.roughness * 0.1 - ink.absorption * 0.05);
+    context.shadowColor = `rgba(0, 0, 0, ${Math.min(0.15, ink.bleed * 0.2)})`;
+    context.shadowBlur = Math.max(0.55, ink.absorption * 2, ink.bleed * 1.5);
+  };
+
   for (const glyph of config.glyphs) {
+    useInk(glyph.inkId);
     context.font = glyph.font;
     const metrics = context.measureText(glyph.char);
-    const ascent = metrics.actualBoundingBoxAscent || glyph.fontSize * 0.78;
-    const descent = metrics.actualBoundingBoxDescent || glyph.fontSize * 0.2;
+    const { ascent, descent } = fontVerticalMetrics(metrics, glyph.fontSize);
     const baseline = glyph.y + (glyph.height + ascent - descent) / 2;
     const baselineJitter = noise.generateJitter(baselineRange);
     const slantJitter = noise.generateRotation(slantRange);

@@ -19,6 +19,12 @@ export interface HandwritingConfig {
   weight: number;
   /** Tinta: id del catálogo (grafito, azul, rojo, ...). */
   inkId: string;
+  /**
+   * Tinta de los títulos. Los documentos anteriores a este campo no la tienen
+   * y usan la del texto, de modo que su aspecto no cambia: léela siempre con
+   * `getHeadingInkId`.
+   */
+  headingInkId?: string;
   /** Opacidad de la tinta 0.4–1. */
   opacity: number;
   /** Amplitud de variación vertical por palabra en px. */

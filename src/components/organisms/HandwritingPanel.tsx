@@ -1,16 +1,23 @@
-import type { HandwritingConfig } from '../../lib/types/handwriting';
+import { useMemo } from 'react';
+import type { FormulaStyle, HandwritingConfig } from '../../lib/types/handwriting';
 import {
   HANDWRITING_PRESETS,
   getPresetStyle,
   matchesPresetStyle,
 } from '../../lib/handwriting/presets';
 import { HANDWRITING_FONTS } from '../../lib/handwriting/fonts';
-import { INK_COLORS } from '../../lib/handwriting/inks';
-import { Select } from '../atoms/Select';
+import { INK_COLORS, getHeadingInkId } from '../../lib/handwriting/inks';
+import { Select, type SelectItem } from '../atoms/Select';
 import { Slider } from '../atoms/Slider';
 import { Separator } from '../atoms/Separator';
 import { PresetCard } from '../molecules/PresetCard';
 import { InkColorSwatch } from '../molecules/InkColorSwatch';
+
+const FORMULA_OPTIONS: SelectItem<FormulaStyle>[] = [
+  { value: 'manuscrita', label: 'Manuscrita', hint: 'Letras a mano, símbolos precisos.' },
+  { value: 'sutil', label: 'Sutil', hint: 'Tipografía KaTeX con tu inclinación.' },
+  { value: 'tipografica', label: 'Tipográfica', hint: 'Apariencia estándar de KaTeX.' },
+];
 
 export interface HandwritingPanelProps {
   config: HandwritingConfig;
@@ -18,6 +25,26 @@ export interface HandwritingPanelProps {
 }
 
 export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
+  const fontOptions = useMemo<SelectItem[]>(
+    () => [
+      {
+        label: 'Del proyecto handwriting',
+        options: HANDWRITING_FONTS.filter((font) => font.id.startsWith('hw-')).map((font) => ({
+          value: font.id,
+          label: font.name,
+        })),
+      },
+      {
+        label: 'Alternativas abiertas',
+        options: HANDWRITING_FONTS.filter((font) => !font.id.startsWith('hw-')).map((font) => ({
+          value: font.id,
+          label: font.name,
+        })),
+      },
+    ],
+    [],
+  );
+
   const activePresetId =
     HANDWRITING_PRESETS.find((preset) => matchesPresetStyle(config, preset))?.id ?? null;
 
@@ -45,24 +72,18 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
 
       <section aria-label="Fuente y tinta" className="space-y-3">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Fuente y tinta</h3>
-        <label className="block">
-          <span className="mb-1 block text-[13px] text-foreground">Fuente manuscrita</span>
-          <Select value={config.fontId} onChange={(event) => onChange({ fontId: event.target.value })}>
-            <optgroup label="Del proyecto handwriting">
-              {HANDWRITING_FONTS.filter((font) => font.id.startsWith('hw-')).map((font) => (
-                <option key={font.id} value={font.id}>{font.name}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Alternativas abiertas">
-              {HANDWRITING_FONTS.filter((font) => !font.id.startsWith('hw-')).map((font) => (
-                <option key={font.id} value={font.id}>{font.name}</option>
-              ))}
-            </optgroup>
-          </Select>
-        </label>
         <div>
-          <span className="mb-1.5 block text-[13px] text-foreground">Color de tinta</span>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Color de tinta">
+          <span className="mb-1 block text-[13px] text-foreground">Fuente manuscrita</span>
+          <Select
+            value={config.fontId}
+            onChange={(fontId) => onChange({ fontId })}
+            options={fontOptions}
+            label="Fuente manuscrita"
+          />
+        </div>
+        <div>
+          <span className="mb-1.5 block text-[13px] text-foreground">Tinta del texto</span>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tinta del texto">
             {INK_COLORS.map((ink) => (
               <InkColorSwatch
                 key={ink.id}
@@ -72,6 +93,23 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
               />
             ))}
           </div>
+        </div>
+        <div>
+          <span className="mb-1.5 block text-[13px] text-foreground">Tinta de los títulos</span>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tinta de los títulos">
+            {INK_COLORS.map((ink) => (
+              <InkColorSwatch
+                key={ink.id}
+                ink={ink}
+                selected={getHeadingInkId(config) === ink.id}
+                onSelect={(headingInkId) => onChange({ headingInkId })}
+              />
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">
+            Se aplica a los encabezados de cualquier nivel. Los documentos sin
+            elección propia usan la tinta del texto.
+          </p>
         </div>
       </section>
 
@@ -98,17 +136,15 @@ export function HandwritingPanel({ config, onChange }: HandwritingPanelProps) {
 
       <section aria-label="Fórmulas" className="space-y-3">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Fórmulas LaTeX</h3>
-        <label className="block">
+        <div>
           <span className="mb-1 block text-[13px] text-foreground">Apariencia</span>
           <Select
-            value={config.formulaStyle}
-            onChange={(event) => onChange({ formulaStyle: event.target.value as HandwritingConfig['formulaStyle'] })}
-          >
-            <option value="manuscrita">Manuscrita</option>
-            <option value="sutil">Sutil</option>
-            <option value="tipografica">Tipográfica</option>
-          </Select>
-        </label>
+            value={config.formulaStyle ?? 'manuscrita'}
+            onChange={(formulaStyle) => onChange({ formulaStyle })}
+            options={FORMULA_OPTIONS}
+            label="Apariencia de las fórmulas"
+          />
+        </div>
         <p className="text-xs leading-relaxed text-muted">
           «Manuscrita» dibuja las letras con tu letra y mantiene los símbolos (∑ ∫ √) precisos.
           «Sutil» conserva la tipografía de KaTeX con la inclinación del texto.

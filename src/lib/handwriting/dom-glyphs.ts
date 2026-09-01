@@ -7,6 +7,8 @@ import type { PositionedGlyph } from './canvas-types';
 export function collectPositionedGlyphs(
   source: HTMLElement,
   page: HTMLElement,
+  /** Tinta a usar si el DOM no declara `--hand-ink-id` (la del texto). */
+  fallbackInkId = 'grafito',
 ): PositionedGlyph[] {
   const pageRect = page.getBoundingClientRect();
   const scaleX = pageRect.width / page.offsetWidth || 1;
@@ -19,6 +21,9 @@ export function collectPositionedGlyphs(
     const computed = window.getComputedStyle(word);
     const fontSize = Number.parseFloat(computed.fontSize) || 16;
     const font = `${computed.fontStyle} ${computed.fontWeight} ${computed.fontSize} ${computed.fontFamily}`;
+    // El CSS decide qué tinta lleva cada parte (los títulos redefinen
+    // `--hand-ink-id`); aquí solo se lee lo que ya resolvió el navegador.
+    const inkId = computed.getPropertyValue('--hand-ink-id').trim() || fallbackInkId;
     let utf16Offset = 0;
 
     for (const char of Array.from(textNode.textContent)) {
@@ -37,6 +42,7 @@ export function collectPositionedGlyphs(
         height: rect.height / scaleY,
         font,
         fontSize,
+        inkId,
       });
     }
   });

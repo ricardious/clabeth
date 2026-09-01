@@ -6,29 +6,49 @@ escritura manuscrita.**
 Editor de Markdown, cuaderno digital y editor de fórmulas en uno. Escribe en
 texto plano, personaliza papel, letra y tinta, y exporta a PDF o PNG.
 
-## Requisitos
+<p align="center">
+  <a href="docs/assets/clabeth-promo.mp4">
+    <img src="docs/assets/clabeth-promo-preview.gif" alt="Demostración de Clabeth" width="900">
+  </a>
+</p>
 
-- Node.js ≥ 22.12
+## Usar Clabeth
 
-## Puesta en marcha
+### 1. En la web
+
+**Próximamente en [clabeth.ricardious.dev](https://clabeth.ricardious.dev).**
+
+Será la forma más sencilla de usar Clabeth: sin instalaciones y directamente
+desde el navegador.
+
+### 2. Ejecutarla localmente
+
+Como alternativa, puedes correr la aplicación en tu equipo. Necesitas
+Node.js 22.12 o posterior y pnpm.
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Abre <http://localhost:4321>. La portada incluye una demo funcional;
-«Empezar a escribir» crea un documento de bienvenida.
+Después abre <http://localhost:4321>. La portada incluye una demostración
+funcional y «Empezar a escribir» crea un documento de bienvenida.
 
-## Comandos
+## Desarrollo
 
-| Comando             | Acción                                    |
-| ------------------- | ----------------------------------------- |
+| Comando          | Acción                                    |
+| ---------------- | ----------------------------------------- |
 | `pnpm dev`       | Servidor de desarrollo                    |
 | `pnpm typecheck` | `astro check` (Astro + TypeScript)        |
 | `pnpm test`      | Vitest + React Testing Library            |
 | `pnpm build`     | typecheck + build de producción (`dist/`) |
 | `pnpm preview`   | Sirve el build localmente                 |
+
+## Contribuir
+
+Las correcciones, propuestas y mejoras son bienvenidas. Consulta
+[CONTRIBUTING.md](CONTRIBUTING.md) para conocer el flujo de trabajo, las
+convenciones del proyecto y los requisitos de un pull request.
 
 ## Funcionalidades
 
@@ -87,3 +107,10 @@ src/
   el bloque siguiente.
 - La exportación captura los mismos nodos de página de la vista previa
   (fuentes y fondo incluidos) y arma PDF con jsPDF.
+
+## Autoría y licencia
+
+Clabeth fue creado por
+[Alex Ricardo Castañeda Rodríguez](https://github.com/ricardious).
+
+Este proyecto se distribuye bajo la [licencia MIT](LICENSE).

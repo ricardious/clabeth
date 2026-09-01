@@ -12,12 +12,13 @@ import type { ClabethDocument } from '../../lib/types/document';
 import type { PaperConfig } from '../../lib/types/paper';
 import type { HandwritingConfig } from '../../lib/types/handwriting';
 import type { MdBlock } from '../../lib/markdown/blocks';
-import type { PreviewMode } from '../../lib/store/ui';
+import type { PreviewMode, PreviewQuality } from '../../lib/store/ui';
 import { splitIntoBlocks } from '../../lib/markdown/blocks';
 import { contentHeight, contentWidth } from '../../lib/paper/styles';
 import { handCssVars } from '../../lib/handwriting/css-vars';
 import { usePagination } from '../../hooks/use-pagination';
 import { IconButton } from '../atoms/IconButton';
+import { Select, type SelectItem } from '../atoms/Select';
 import { Separator } from '../atoms/Separator';
 import { RenderingStatus } from '../molecules/RenderingStatus';
 import { ZoomControls } from '../molecules/ZoomControls';
@@ -34,9 +35,12 @@ export interface PaginatedPreviewProps {
   /** Muestra la barra de controles (editor) o solo las hojas (exportar/mini). */
   interactive?: boolean;
   mode?: PreviewMode;
+  /** Fidelidad del dibujado. La exportación siempre usa `manuscrita`. */
+  quality?: PreviewQuality;
   zoom?: number;
   currentPage?: number;
   onModeChange?: (mode: PreviewMode) => void;
+  onQualityChange?: (quality: PreviewQuality) => void;
   onPageChange?: (page: number) => void;
   onPagesChange?: (count: number) => void;
   renderingPreviewKey?: string | null;
@@ -51,6 +55,19 @@ const MODE_ICONS: Record<PreviewMode, { label: string; icon: ReactNode }> = {
   dos: { label: 'Dos páginas', icon: <RectangleHorizontal size={15} aria-hidden /> },
 };
 
+const QUALITY_OPTIONS: SelectItem<PreviewQuality>[] = [
+  {
+    value: 'manuscrita',
+    label: 'Manuscrita',
+    hint: 'Tinta, papel y variación humana dibujados.',
+  },
+  {
+    value: 'borrador',
+    label: 'Sin renderizar',
+    hint: 'Solo el texto con la fuente. Responde al instante.',
+  },
+];
+
 function BlockForMeasure({ block, seed, hand }: { block: MdBlock; seed: string; hand: HandwritingConfig }) {
   if (block.pageBreak) return <div data-pagebreak style={{ height: 0 }} />;
   return <MarkdownBlock block={block} seed={seed} hand={hand} />;
@@ -61,15 +78,20 @@ export function PaginatedPreview({
   paperOverride,
   interactive = true,
   mode = 'continua',
+  quality = 'manuscrita',
   zoom = 1,
   currentPage = 0,
   onModeChange,
+  onQualityChange,
   onPageChange,
   onPagesChange,
   renderingPreviewKey = null,
   onPreviewRenderReady,
   registerPages,
 }: PaginatedPreviewProps) {
+  // En borrador no hay Canvas que avise de que terminó, así que tampoco hay
+  // espera que mostrar: el DOM ya está pintado.
+  const pendingRenderKey = quality === 'manuscrita' ? renderingPreviewKey : null;
   const paper = paperOverride ?? document.paper;
   const blocks = useMemo(() => splitIntoBlocks(document.content), [document.content]);
   const measureKey = useMemo(
@@ -120,12 +142,12 @@ export function PaginatedPreview({
   }, [pages, mode, currentPage]);
 
   useLayoutEffect(() => {
-    if (renderingPreviewKey) readyPreviewPages.current.clear();
-  }, [renderingPreviewKey]);
+    if (pendingRenderKey) readyPreviewPages.current.clear();
+  }, [pendingRenderKey]);
 
   const handlePageRenderState = useCallback(
     (pageIndex: number, renderKey: string, state: CanvasRenderState): void => {
-      if (!renderingPreviewKey || renderKey !== renderingPreviewKey) return;
+      if (!pendingRenderKey || renderKey !== pendingRenderKey) return;
       if (state !== 'ready' && state !== 'error') return;
 
       readyPreviewPages.current.add(pageIndex);
@@ -133,7 +155,7 @@ export function PaginatedPreview({
         onPreviewRenderReady?.(renderKey);
       }
     },
-    [onPreviewRenderReady, renderingPreviewKey, visibleIndices],
+    [onPreviewRenderReady, pendingRenderKey, visibleIndices],
   );
 
   useLayoutEffect(() => {
@@ -160,8 +182,8 @@ export function PaginatedPreview({
       className={cn('relative flex h-full flex-col bg-panel', fullscreen && 'bg-background')}
     >
       {interactive && (
-        <div className="flex h-[var(--topbar-h)] shrink-0 items-center justify-end gap-2 border-b border-outline bg-surface px-3">
-          <div className="flex items-center gap-0.5" role="group" aria-label="Modo de vista">
+        <div className="flex h-[var(--topbar-h)] shrink-0 items-center justify-end gap-2 overflow-x-auto border-b border-outline bg-surface px-3">
+          <div className="flex shrink-0 items-center gap-0.5" role="group" aria-label="Modo de vista">
             {(Object.keys(MODE_ICONS) as PreviewMode[]).map((m) => (
               <IconButton
                 key={m}
@@ -179,6 +201,17 @@ export function PaginatedPreview({
             <PageNavigator page={currentPage} total={totalPages} onChange={(p) => onPageChange?.(p)} />
           )}
           <ZoomControls />
+          {/* El panel es más ancho que el disparador para que quepan las
+              descripciones de cada modo. */}
+          <Select
+            value={quality}
+            onChange={(next) => onQualityChange?.(next)}
+            options={QUALITY_OPTIONS}
+            label="Fidelidad de la vista previa"
+            size="sm"
+            className="w-[124px] shrink-0"
+            menuMinWidth={252}
+          />
           <Separator vertical className="mx-1 h-5" />
           <IconButton
             label={fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
@@ -223,13 +256,14 @@ export function PaginatedPreview({
                 pageIndex={pageIndex}
                 totalPages={totalPages}
                 zoom={zoom}
+                quality={quality}
                 onRenderStateChange={handlePageRenderState}
               />
             ))}
           </div>
         )}
 
-        {renderingPreviewKey ? (
+        {pendingRenderKey ? (
           <RenderingStatus
             title="Aplicando cambios"
             description="Redibujando la tinta, la escritura y el papel de las hojas visibles."

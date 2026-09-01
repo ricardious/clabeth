@@ -1,6 +1,6 @@
 import type { HandwritingConfig } from '../types/handwriting';
 import { getHandwritingFont } from './fonts';
-import { getInk } from './inks';
+import { getHeadingInkId, getInk } from './inks';
 
 const KATEX_MAIN = 'KaTeX_Main';
 
@@ -41,6 +41,12 @@ export function handCssVars(hand: HandwritingConfig, contentTopPx = 0): Record<s
     '--hand-slant': `${hand.slant}deg`,
     '--hand-weight': String(hand.weight),
     '--hand-ink': `var(${getInk(hand.inkId).token})`,
+    '--hand-heading-ink': `var(${getInk(getHeadingInkId(hand)).token})`,
+    // El id viaja junto al color porque el motor Canvas necesita el perfil de
+    // la tinta (sangrado, absorción), no solo su color. Así el CSS sigue siendo
+    // la única fuente de verdad de qué tinta lleva cada parte del documento.
+    '--hand-ink-id': hand.inkId,
+    '--hand-heading-ink-id': getHeadingInkId(hand),
     '--hand-opacity': String(hand.opacity),
     '--formula-font': formulaFont,
     '--formula-slant': formulaSlant,

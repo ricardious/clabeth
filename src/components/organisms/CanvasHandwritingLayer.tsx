@@ -7,6 +7,9 @@ import { renderHandwritingCanvas } from '../../lib/handwriting/canvas-renderer';
 
 export type CanvasRenderState = 'scheduled' | 'rendering' | 'ready' | 'error';
 
+/** Espera para agrupar cambios seguidos sobre una hoja que ya está pintada. */
+const DEBOUNCE_MS = 70;
+
 interface CanvasHandwritingLayerProps {
   pageRef: RefObject<HTMLElement | null>;
   sourceRef: RefObject<HTMLDivElement | null>;
@@ -38,6 +41,21 @@ export function CanvasHandwritingLayer({
 }: CanvasHandwritingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // El aviso de estado no describe *qué* dibujar, así que no puede estar entre
+  // las dependencias del efecto: una identidad nueva (un callback en línea del
+  // padre, por ejemplo al cambiar de pestaña del inspector) provocaba un
+  // repintado completo de la hoja sin que el documento hubiera cambiado.
+  // La ref se actualiza antes que el efecto de dibujado porque se declara antes.
+  const notifyRef = useRef(onRenderStateChange);
+  useLayoutEffect(() => {
+    notifyRef.current = onRenderStateChange;
+  });
+  const notify = (state: CanvasRenderState): void => notifyRef.current?.(state);
+
+  // Sobrevive a las re-ejecuciones del efecto, no al desmontaje: distingue la
+  // primera pintada de esta hoja de un cambio posterior de configuración.
+  const hasDrawn = useRef(false);
+
   useLayoutEffect(() => {
     let disposed = false;
     let frame = 0;
@@ -47,7 +65,7 @@ export function CanvasHandwritingLayer({
     const source = sourceRef.current ?? page?.querySelector<HTMLDivElement>('.canvas-handwriting-source') ?? null;
     if (!page || !source || !canvas) return;
     canvas.dataset.renderState = 'scheduled';
-    onRenderStateChange?.('scheduled');
+    notify('scheduled');
 
     const draw = async (): Promise<void> => {
       await window.document.fonts.ready;
@@ -56,9 +74,9 @@ export function CanvasHandwritingLayer({
         void (async () => {
           try {
             canvas.dataset.renderState = 'rendering';
-            onRenderStateChange?.('rendering');
+            notify('rendering');
             const pageStyle = window.getComputedStyle(page);
-            const glyphs = collectPositionedGlyphs(source, page);
+            const glyphs = collectPositionedGlyphs(source, page, handwriting.inkId);
             const metrics = await renderHandwritingCanvas(canvas, {
               width,
               height,
@@ -80,12 +98,13 @@ export function CanvasHandwritingLayer({
               },
             });
             if (!disposed) {
+              hasDrawn.current = true;
               canvas.dataset.renderState = 'ready';
               canvas.dataset.renderMs = metrics.durationMs.toFixed(1);
               canvas.dataset.glyphCount = String(metrics.glyphCount);
               delete canvas.dataset.renderError;
               page.classList.add('canvas-handwriting-ready');
-              onRenderStateChange?.('ready');
+              notify('ready');
             }
           } catch (error) {
             // El DOM sigue visible como fallback si Canvas o la textura fallan.
@@ -93,19 +112,24 @@ export function CanvasHandwritingLayer({
               canvas.dataset.renderState = 'error';
               canvas.dataset.renderError = error instanceof Error ? error.message : 'Error de render desconocido';
               page.classList.remove('canvas-handwriting-ready');
-              onRenderStateChange?.('error');
+              notify('error');
             }
           }
         })();
       });
     };
 
-    // Un pequeño debounce evita repintar una página completa por cada tecla.
-    timer = window.setTimeout(() => void draw(), 70);
+    // El debounce agrupa cambios seguidos sobre una hoja ya pintada (arrastrar
+    // un deslizador de trazo). En la primera pintada no hay nada que agrupar y
+    // esperar solo alarga el rato en que se ve el DOM sin tinta: ocurre cada
+    // vez que una hoja se monta, que es lo que pasa al volver a la vista
+    // continua o al pasar de página.
+    const delay = hasDrawn.current ? DEBOUNCE_MS : 0;
+    timer = window.setTimeout(() => void draw(), delay);
     const observer = new ResizeObserver(() => {
       window.clearTimeout(timer);
       window.cancelAnimationFrame(frame);
-      timer = window.setTimeout(() => void draw(), 70);
+      timer = window.setTimeout(() => void draw(), DEBOUNCE_MS);
     });
     observer.observe(source);
 
@@ -116,7 +140,10 @@ export function CanvasHandwritingLayer({
       window.cancelAnimationFrame(frame);
       page.classList.remove('canvas-handwriting-ready');
     };
-  }, [height, handwriting, onRenderStateChange, pageRef, paper, renderKey, seed, sourceRef, width]);
+    // `notify` se lee desde una ref a propósito: avisar del estado no debe
+    // disparar un redibujado.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [height, handwriting, pageRef, paper, renderKey, seed, sourceRef, width]);
 
   return <canvas ref={canvasRef} className="handwriting-canvas" aria-hidden="true" />;
 }

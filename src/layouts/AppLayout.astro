@@ -52,7 +52,7 @@ const navItems = [
     >
       <div class="flex h-[var(--topbar-h)] items-center justify-between border-b border-outline px-3">
         <a href="/" aria-label="Ir a la portada de Clabeth" data-nav-label><Logo size="sm" /></a>
-        <button id="nav-toggle" type="button" aria-label="Contraer navegación" class="inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-panel hover:text-foreground">
+        <button id="nav-toggle" type="button" aria-label="Contraer navegación" class="inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-hover hover:text-foreground">
           <span data-collapse-icon><PanelLeftClose size={16} aria-hidden="true" /></span>
           <span data-expand-icon hidden><PanelLeftOpen size={16} aria-hidden="true" /></span>
         </button>
@@ -67,7 +67,7 @@ const navItems = [
               aria-current={active ? 'page' : undefined}
               class:list={[
                 'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors duration-[var(--dur-fast)]',
-                active ? 'bg-primary-soft font-medium text-primary' : 'text-muted hover:bg-panel hover:text-foreground',
+                active ? 'bg-primary-soft font-medium text-primary' : 'text-muted hover:bg-hover hover:text-foreground',
               ]}
             >
               <Icon size={17} aria-hidden="true" class="shrink-0" />
@@ -78,7 +78,7 @@ const navItems = [
       </div>
       <div class="border-t border-outline p-2">
         <div class="flex items-center justify-between gap-1">
-          <a href="/" title="Portada" class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted hover:bg-panel hover:text-foreground">
+          <a href="/" title="Portada" class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted hover:bg-hover hover:text-foreground">
             <House size={17} aria-hidden="true" />
             <span data-nav-label>Portada</span>
           </a>

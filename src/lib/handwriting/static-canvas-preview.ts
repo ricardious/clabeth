@@ -61,7 +61,7 @@ export function mountStaticCanvasPreview({
         quality: 2,
         seed,
         realismLevel: 2,
-        glyphs: collectPositionedGlyphs(source, page),
+        glyphs: collectPositionedGlyphs(source, page, handwriting.inkId),
         handwriting,
         paper: {
           style: paperStyle,

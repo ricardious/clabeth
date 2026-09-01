@@ -1,0 +1,376 @@
+---
+/**
+ * Select del sistema de diseño para las páginas Astro.
+ *
+ * Mejora progresiva sobre un `<select>` nativo: el nativo sigue siendo la
+ * fuente de verdad (`.value`, eventos `change`, envío de formularios) y el
+ * script lo sustituye visualmente por el mismo desplegable que usan las islas
+ * React. Sin JavaScript, el control nativo funciona tal cual.
+ *
+ * Los atributos extra (`data-setting`, `data-library-sort`, `aria-label`, …)
+ * se reenvían al `<select>`, de modo que los scripts que ya lo consultan no
+ * necesitan cambios.
+ */
+interface Props {
+  class?: string;
+  size?: 'sm' | 'md';
+  [key: string]: unknown;
+}
+
+const { class: className = '', size = 'md', ...rest } = Astro.props;
+---
+
+<div class:list={['clabeth-select', className]} data-select data-select-size={size}>
+  <select data-select-native {...rest}>
+    <slot />
+  </select>
+</div>
+
+<script>
+  interface MenuGeometry {
+    left: number;
+    top: number;
+    width: number;
+    maxHeight: number;
+  }
+
+  const MENU_MARGIN = 6;
+  const VIEWPORT_PADDING = 8;
+  const SUPPORTS_POPOVER = typeof HTMLElement.prototype.showPopover === 'function';
+
+  const TRIGGER_BASE =
+    'flex w-full items-center gap-2 rounded-md border border-outline bg-surface text-left text-foreground transition-colors duration-[var(--dur-fast)] hover:border-outline-strong disabled:pointer-events-none disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-focus-ring focus-visible:outline-offset-1';
+  const TRIGGER_SIZE = {
+    sm: 'h-[var(--control-h-sm)] px-2 text-[13px]',
+    md: 'h-[var(--control-h-md)] px-2.5 text-sm',
+  };
+
+  const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+  const CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+  let sequence = 0;
+
+  function enhance(root: HTMLElement): void {
+    if (root.dataset.selectReady === 'true') return;
+    const found = root.querySelector<HTMLSelectElement>('[data-select-native]');
+    if (!found) return;
+    // Las funciones declaradas más abajo se elevan, así que TypeScript no
+    // conserva el estrechamiento de `found`: se fija el tipo aquí.
+    const native: HTMLSelectElement = found;
+    root.dataset.selectReady = 'true';
+
+    const size = (root.dataset.selectSize as 'sm' | 'md') ?? 'md';
+    const id = `select-${++sequence}`;
+    const listboxId = `${id}-listbox`;
+
+    const trigger = window.document.createElement('button');
+    trigger.type = 'button';
+    trigger.id = id;
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', listboxId);
+    trigger.className = `${TRIGGER_BASE} ${TRIGGER_SIZE[size]}`;
+    trigger.innerHTML = `<span data-select-value class="min-w-0 flex-1 truncate"></span><span data-select-chevron class="clabeth-select-icon shrink-0 text-muted transition-transform duration-[var(--dur-fast)] ${size === 'sm' ? 'size-3.5' : 'size-4'}">${CHEVRON}</span>`;
+
+    const listbox = window.document.createElement('div');
+    listbox.id = listboxId;
+    listbox.setAttribute('role', 'listbox');
+    listbox.className = 'clabeth-listbox';
+    if (SUPPORTS_POPOVER) listbox.setAttribute('popover', 'manual');
+
+    // El nativo conserva el valor y los eventos, pero sale del orden de foco.
+    const nativeLabel = native.getAttribute('aria-label');
+    if (nativeLabel) trigger.setAttribute('aria-label', nativeLabel);
+    if (native.id) {
+      const associated = window.document.querySelector<HTMLLabelElement>(`label[for="${native.id}"]`);
+      if (associated) trigger.setAttribute('aria-labelledby', associated.id || native.id);
+    }
+    native.setAttribute('aria-hidden', 'true');
+    native.tabIndex = -1;
+
+    root.append(trigger, listbox);
+
+    let open = false;
+    let activeIndex = -1;
+    let typeaheadQuery = '';
+    let typeaheadAt = 0;
+
+    const items = (): HTMLOptionElement[] => Array.from(native.options);
+    const selectable = (): number[] =>
+      items()
+        .map((option, index) => (option.disabled ? -1 : index))
+        .filter((index) => index >= 0);
+
+    function renderTrigger(): void {
+      const current = native.selectedOptions[0];
+      const value = trigger.querySelector<HTMLElement>('[data-select-value]');
+      if (value) {
+        value.textContent = current?.label ?? 'Seleccionar…';
+        value.classList.toggle('text-muted', !current);
+      }
+    }
+
+    /** Solo el resaltado: mover el ratón no debe rehacer el DOM bajo el cursor. */
+    function renderActive(): void {
+      listbox.querySelectorAll<HTMLElement>('[role="option"]').forEach((element) => {
+        element.classList.toggle(
+          'bg-hover',
+          Number(element.dataset.index) === activeIndex &&
+            element.getAttribute('aria-disabled') !== 'true',
+        );
+      });
+
+      if (open && activeIndex >= 0) {
+        trigger.setAttribute('aria-activedescendant', `${listboxId}-option-${activeIndex}`);
+        listbox
+          .querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
+          ?.scrollIntoView({ block: 'nearest' });
+      } else {
+        trigger.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function renderListbox(): void {
+      listbox.replaceChildren();
+      let index = -1;
+
+      const renderOption = (option: HTMLOptionElement, parent: HTMLElement): void => {
+        index += 1;
+        const position = index;
+        const isSelected = option.selected;
+        const element = window.document.createElement('div');
+        element.id = `${listboxId}-option-${position}`;
+        element.dataset.index = String(position);
+        element.setAttribute('role', 'option');
+        element.setAttribute('aria-selected', String(isSelected));
+        if (option.disabled) element.setAttribute('aria-disabled', 'true');
+        element.className = [
+          'flex cursor-pointer items-start gap-2 rounded-sm px-2.5 py-1.5 text-sm',
+          option.disabled ? 'cursor-not-allowed opacity-45' : '',
+          isSelected ? 'text-primary' : 'text-foreground',
+        ]
+          .filter(Boolean)
+          .join(' ');
+        element.innerHTML = `<span class="min-w-0 flex-1 truncate"></span>${
+          isSelected
+            ? `<span class="clabeth-select-icon mt-0.5 size-3.5 shrink-0 text-primary">${CHECK}</span>`
+            : ''
+        }`;
+        element.querySelector('span')!.textContent = option.label;
+        element.addEventListener('pointerenter', () => {
+          if (option.disabled) return;
+          activeIndex = position;
+          renderActive();
+        });
+        element.addEventListener('click', () => commit(position));
+        parent.append(element);
+      };
+
+      Array.from(native.children).forEach((child) => {
+        if (child instanceof HTMLOptGroupElement) {
+          const group = window.document.createElement('div');
+          group.setAttribute('role', 'group');
+          group.setAttribute('aria-label', child.label);
+          const heading = window.document.createElement('div');
+          heading.className =
+            'px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted';
+          heading.textContent = child.label;
+          group.append(heading);
+          Array.from(child.children).forEach((option) => {
+            if (option instanceof HTMLOptionElement) renderOption(option, group);
+          });
+          listbox.append(group);
+        } else if (child instanceof HTMLOptionElement) {
+          renderOption(child, listbox);
+        }
+      });
+
+      renderActive();
+    }
+
+    function geometry(): MenuGeometry {
+      const rect = trigger.getBoundingClientRect();
+      const below = window.innerHeight - rect.bottom - MENU_MARGIN - VIEWPORT_PADDING;
+      const above = rect.top - MENU_MARGIN - VIEWPORT_PADDING;
+      const openUp = below < 180 && above > below;
+      const maxHeight = Math.max(120, Math.min(320, openUp ? above : below));
+      const width = rect.width;
+      const left = Math.min(
+        Math.max(VIEWPORT_PADDING, rect.left),
+        Math.max(VIEWPORT_PADDING, window.innerWidth - width - VIEWPORT_PADDING),
+      );
+      return {
+        left,
+        top: openUp ? rect.top - MENU_MARGIN - maxHeight : rect.bottom + MENU_MARGIN,
+        width,
+        maxHeight,
+      };
+    }
+
+    function place(): void {
+      const { left, top, width, maxHeight } = geometry();
+      listbox.style.left = `${left}px`;
+      listbox.style.top = `${top}px`;
+      listbox.style.width = `${width}px`;
+      listbox.style.maxHeight = `${maxHeight}px`;
+    }
+
+    function reposition(): void {
+      if (open) place();
+    }
+
+    function openMenu(): void {
+      if (native.disabled || open) return;
+      open = true;
+      activeIndex = native.selectedIndex >= 0 ? native.selectedIndex : (selectable()[0] ?? -1);
+      place();
+      if (SUPPORTS_POPOVER) listbox.showPopover();
+      else listbox.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      trigger.querySelector('[data-select-chevron]')?.classList.add('rotate-180');
+      trigger.classList.add('border-outline-strong');
+      renderListbox();
+      window.addEventListener('scroll', reposition, true);
+      window.addEventListener('resize', reposition);
+    }
+
+    function closeMenu(refocus = true): void {
+      if (!open) return;
+      open = false;
+      if (SUPPORTS_POPOVER) listbox.hidePopover();
+      else listbox.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.removeAttribute('aria-activedescendant');
+      trigger.querySelector('[data-select-chevron]')?.classList.remove('rotate-180');
+      trigger.classList.remove('border-outline-strong');
+      window.removeEventListener('scroll', reposition, true);
+      window.removeEventListener('resize', reposition);
+      if (refocus) trigger.focus();
+    }
+
+    function commit(index: number): void {
+      const option = items()[index];
+      if (!option || option.disabled) return;
+      if (native.selectedIndex !== index) {
+        native.selectedIndex = index;
+        native.dispatchEvent(new Event('input', { bubbles: true }));
+        native.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      renderTrigger();
+      closeMenu();
+    }
+
+    function moveActive(direction: 1 | -1): void {
+      const candidates = selectable();
+      if (candidates.length === 0) return;
+      const current = candidates.indexOf(activeIndex);
+      const next =
+        current === -1
+          ? direction === 1
+            ? 0
+            : candidates.length - 1
+          : Math.min(candidates.length - 1, Math.max(0, current + direction));
+      activeIndex = candidates[next]!;
+      renderActive();
+    }
+
+    function searchByLabel(char: string): void {
+      const now = Date.now();
+      typeaheadQuery = now - typeaheadAt > 700 ? char : typeaheadQuery + char;
+      typeaheadAt = now;
+      const query = typeaheadQuery.toLowerCase();
+      const found = selectable().find((index) =>
+        items()[index]!.label.toLowerCase().startsWith(query),
+      );
+      if (found === undefined) return;
+      if (open) {
+        activeIndex = found;
+        renderActive();
+      } else {
+        commit(found);
+      }
+    }
+
+    trigger.addEventListener('click', () => (open ? closeMenu() : openMenu()));
+    trigger.addEventListener('keydown', (event) => {
+      if (!open) {
+        if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+          event.preventDefault();
+          openMenu();
+          return;
+        }
+        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          searchByLabel(event.key);
+        }
+        return;
+      }
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          moveActive(1);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          moveActive(-1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          activeIndex = selectable()[0] ?? -1;
+          renderActive();
+          break;
+        case 'End': {
+          event.preventDefault();
+          const candidates = selectable();
+          activeIndex = candidates[candidates.length - 1] ?? -1;
+          renderActive();
+          break;
+        }
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          commit(activeIndex);
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closeMenu();
+          break;
+        case 'Tab':
+          closeMenu(false);
+          break;
+        default:
+          if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+            event.preventDefault();
+            searchByLabel(event.key);
+          }
+      }
+    });
+
+    window.document.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (!open) return;
+        const target = event.target as Node | null;
+        if (!target || trigger.contains(target) || listbox.contains(target)) return;
+        closeMenu(false);
+      },
+      true,
+    );
+
+    // Cambios programáticos del valor (p. ej. al restaurar preferencias):
+    // quien asigne `.value` avisa con `clabeth:select-sync`. Si ese script se
+    // ejecutó antes que esta mejora, el `renderTrigger` inicial ya lee el valor
+    // correcto, así que ambos órdenes de carga funcionan.
+    native.addEventListener('change', renderTrigger);
+    native.addEventListener('clabeth:select-sync', renderTrigger);
+    renderTrigger();
+  }
+
+  function enhanceAll(): void {
+    window.document.querySelectorAll<HTMLElement>('[data-select]').forEach(enhance);
+  }
+
+  enhanceAll();
+  window.document.addEventListener('astro:page-load', enhanceAll);
+</script>

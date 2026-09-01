@@ -14,6 +14,10 @@
   --muted: oklch(0.52 0.015 60);
   --outline: oklch(0.88 0.01 75);
   --outline-strong: oklch(0.78 0.015 70);
+  /* Realce al pasar el puntero: en claro oscurece, en oscuro aclara. */
+  --hover: oklch(0.945 0.009 80);
+  /* Perilla de los interruptores: siempre contrasta con su carril. */
+  --knob: oklch(0.99 0.004 80);
 
   /* ——— Marca: rojo intenso ——— */
   --primary: oklch(0.55 0.22 26);
@@ -104,64 +108,42 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ——— Tema oscuro explícito ——— */
+/* ——— Tema oscuro explícito ———
+   No hay modo «sistema»: la preferencia es siempre explícita, así que
+   basta con este bloque y no hace falta duplicarlo bajo
+   prefers-color-scheme. Los valores buscan que cada superficie elevada
+   sea más clara que su fondo y que texto, bordes y estados mantengan
+   contraste suficiente (véase la nota de cada grupo). */
 [data-theme='dark'] {
   --background: oklch(0.235 0.014 55);
-  --surface: oklch(0.27 0.016 55);
-  --panel: oklch(0.21 0.012 55);
+  --surface: oklch(0.28 0.016 55);
+  --panel: oklch(0.205 0.012 55);
   --foreground: oklch(0.9 0.01 75);
-  --foreground-strong: oklch(0.95 0.008 75);
-  --muted: oklch(0.65 0.015 65);
-  --outline: oklch(0.36 0.02 55);
-  --outline-strong: oklch(0.45 0.02 55);
+  --foreground-strong: oklch(0.96 0.008 75);
+  --muted: oklch(0.7 0.015 65);
+  /* Bordes más presentes: con 0.36 apenas se distinguían del lienzo. */
+  --outline: oklch(0.4 0.018 55);
+  --outline-strong: oklch(0.52 0.02 55);
+  /* En oscuro el hover aclara; reutilizar --panel abría un hueco negro. */
+  --hover: oklch(0.335 0.018 55);
+  --knob: oklch(0.92 0.008 75);
 
-  --primary: oklch(0.68 0.21 26);
-  --primary-strong: oklch(0.74 0.2 26);
-  --primary-foreground: oklch(0.2 0.02 30);
-  --primary-soft: oklch(0.36 0.09 26);
-  --secondary: oklch(0.33 0.02 50);
+  --primary: oklch(0.7 0.2 26);
+  --primary-strong: oklch(0.77 0.18 26);
+  --primary-foreground: oklch(0.19 0.02 30);
+  /* Fondo suave de marca: se oscurece para que --primary encima sea legible. */
+  --primary-soft: oklch(0.28 0.07 26);
+  --secondary: oklch(0.34 0.02 50);
   --secondary-foreground: oklch(0.9 0.01 75);
-  --accent: oklch(0.7 0.15 40);
+  --accent: oklch(0.74 0.13 40);
   --accent-foreground: oklch(0.18 0.02 40);
 
-  --success: oklch(0.65 0.11 150);
-  --warning: oklch(0.72 0.12 75);
-  --error: oklch(0.66 0.18 25);
-  --focus-ring: oklch(0.72 0.19 26);
+  --success: oklch(0.74 0.13 150);
+  --warning: oklch(0.8 0.13 80);
+  --error: oklch(0.72 0.16 25);
+  --focus-ring: oklch(0.76 0.16 26);
 
   --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -4px rgb(0 0 0 / 0.4);
   --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.35), 0 12px 28px -6px rgb(0 0 0 / 0.5);
   --shadow-page: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.6);
-}
-
-/* ——— Tema «sistema»: sin data-theme, seguir prefers-color-scheme ——— */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) {
-    --background: oklch(0.235 0.014 55);
-    --surface: oklch(0.27 0.016 55);
-    --panel: oklch(0.21 0.012 55);
-    --foreground: oklch(0.9 0.01 75);
-    --foreground-strong: oklch(0.95 0.008 75);
-    --muted: oklch(0.65 0.015 65);
-    --outline: oklch(0.36 0.02 55);
-    --outline-strong: oklch(0.45 0.02 55);
-
-    --primary: oklch(0.68 0.21 26);
-    --primary-strong: oklch(0.74 0.2 26);
-    --primary-foreground: oklch(0.2 0.02 30);
-    --primary-soft: oklch(0.36 0.09 26);
-    --secondary: oklch(0.33 0.02 50);
-    --secondary-foreground: oklch(0.9 0.01 75);
-    --accent: oklch(0.7 0.15 40);
-    --accent-foreground: oklch(0.18 0.02 40);
-
-    --success: oklch(0.65 0.11 150);
-    --warning: oklch(0.72 0.12 75);
-    --error: oklch(0.66 0.18 25);
-    --focus-ring: oklch(0.72 0.19 26);
-
-    --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -4px rgb(0 0 0 / 0.4);
-    --shadow-pop: 0 2px 6px rgb(0 0 0 / 0.35), 0 12px 28px -6px rgb(0 0 0 / 0.5);
-    --shadow-page: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.6);
-  }
 }

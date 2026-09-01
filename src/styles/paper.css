@@ -23,8 +23,12 @@
 }
 
 /* ——— Fondos de papel ——— */
+/* `isolation` acota el multiply de la escritura al interior de la hoja: sin
+   ella, una miniatura sobre una tarjeta oscura se mezclaría con la tarjeta y
+   se volvería negra en tema oscuro. */
 .paper-bg {
   background-color: var(--paper);
+  isolation: isolate;
 }
 
 .paper-blanca {
@@ -253,8 +257,16 @@
   word-spacing: var(--hand-word-spacing);
   font-weight: var(--hand-weight);
   color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
-  mix-blend-mode: multiply;
   text-rendering: optimizeLegibility;
+}
+
+/* La tinta solo se multiplica cuando tiene papel debajo. Si `.hand-scope` es a
+   la vez la superficie de papel (miniaturas, ejemplos de las guías), el
+   multiply mezclaría la hoja con la tarjeta que hay detrás y en tema oscuro la
+   dejaría negra. */
+.page .hand-scope,
+.paper-bg .hand-scope {
+  mix-blend-mode: multiply;
 }
 
 /* Presión y sangrado simulan varias pasadas microscópicas del trazo. */
@@ -284,6 +296,13 @@
   font-weight: 700;
   line-height: 1.3;
   margin: 0.55em 0 0.2em;
+  /* Los títulos pueden llevar su propia tinta. Se redefine `--hand-ink` en vez
+     de solo el color: así el sangrado de `.jw` y el id que lee el motor Canvas
+     cambian con ella, sin repetir la regla en cada sitio. `color` sí hay que
+     volver a declararlo, porque se heredó ya calculado del ancestro. */
+  --hand-ink: var(--hand-heading-ink, var(--ink-grafito));
+  --hand-ink-id: var(--hand-heading-ink-id);
+  color: color-mix(in oklch, var(--hand-ink) calc(var(--hand-opacity) * 100%), transparent);
 }
 
 .hand-scope h1 {
@@ -404,10 +423,10 @@
   background: color-mix(in oklch, var(--paper-margin-line) 28%, transparent);
 }
 
-/* ——— KaTeX: las fórmulas conservan precisión ——— */
-.hand-scope .katex {
-  font-size: 1.04em;
-}
+/* ——— KaTeX: las fórmulas conservan precisión ———
+   El tamaño y la apariencia de la fórmula viven en formulas.css, que se
+   importa después que este archivo. Declarar aquí `font-size` no tenía
+   efecto y hacía creer que se podía ajustar desde dos sitios. */
 
 /* Sin overflow oculto en vertical: algunos glifos manuscritos (Reenie, etc.)
    sobresalen del em box de KaTeX y se cortarían si se recortara la caja. */
@@ -415,22 +434,33 @@
   margin: 0.35em 0;
 }
 
-/* Fórmula inválida: chip comprensible, el código original se conserva */
+/* Fórmula inválida: chip comprensible, el código original se conserva.
+
+   El chip existe para que puedas leer y corregir tu LaTeX, así que muestra la
+   fuente entera: antes iba en una sola línea recortada con puntos suspensivos,
+   y una fórmula larga (un \begin{aligned} de varias líneas, por ejemplo)
+   quedaba reducida a un cuadrito ilegible.
+
+   `display: inline` permite que fluya y se parta en varias líneas;
+   `box-decoration-break: clone` cierra el borde discontinuo en cada fragmento
+   para que se siga leyendo como un único bloque marcado. */
 .latex-error-chip {
-  display: inline-block;
+  display: inline;
   font-family: var(--font-mono);
-  font-size: 0.68em;
+  font-size: 0.72em;
+  line-height: 1.6;
   color: var(--error);
   background: color-mix(in oklch, var(--error) 8%, var(--paper));
   border: 1px dashed var(--error);
   border-radius: var(--radius-sm);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   padding: 0.05em 0.4em;
   cursor: help;
-  white-space: nowrap;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: baseline;
+  /* Conserva los espacios del original y permite el salto de línea. */
+  white-space: pre-wrap;
+  /* Un encadenado largo de macros sin espacios también debe poder partirse. */
+  overflow-wrap: anywhere;
 }
 
 /* ——— Exportación sin fondo: página plana ——— */

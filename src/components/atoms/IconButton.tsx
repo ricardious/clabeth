@@ -29,7 +29,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
           ? 'text-error hover:bg-primary-soft'
           : active
             ? 'bg-primary-soft text-primary'
-            : 'text-muted hover:bg-panel hover:text-foreground',
+            : 'text-muted hover:bg-hover hover:text-foreground',
         className,
       )}
       {...props}

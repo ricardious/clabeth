@@ -79,7 +79,15 @@ describe('presets y catálogos', () => {
   });
 
   it('el preset por defecto está completo', () => {
-    expect(Object.keys(DEFAULT_HANDWRITING)).toHaveLength(12);
+    expect(Object.keys(DEFAULT_HANDWRITING)).toHaveLength(13);
+  });
+
+  it('cada preset fija la tinta de los títulos', () => {
+    const catalogue = new Set(INK_COLORS.map((ink) => ink.id));
+    for (const preset of HANDWRITING_PRESETS) {
+      expect(preset.config.headingInkId, preset.name).toBeDefined();
+      expect(catalogue, preset.name).toContain(preset.config.headingInkId!);
+    }
   });
 
   it('todos los presets usan fórmulas manuscritas por defecto', () => {
@@ -126,6 +134,10 @@ describe('presets y catálogos', () => {
     ]));
     expect(fontIds).not.toContain('caveat');
     expect(fontIds).not.toContain('kalam');
+    // Retiradas: sus glifos acentuados venían de otra fuente y el cuerpo de la
+    // letra salía 2–3,4× más grueso que en su versión sin tilde.
+    expect(fontIds).not.toContain('hw-4');
+    expect(fontIds).not.toContain('hw-7');
   });
 
   it('los IDs retirados migran a fuentes aprobadas para español', () => {
@@ -133,6 +145,8 @@ describe('presets y catálogos', () => {
     expect(getHandwritingFont('hw-2').id).toBe('gochi');
     expect(getHandwritingFont('hw-5').id).toBe('gochi');
     expect(getHandwritingFont('hw-6').id).toBe('playwrite-es');
+    expect(getHandwritingFont('hw-4').id).toBe('nothing-you-could-do');
+    expect(getHandwritingFont('hw-7').id).toBe('give-you-glory');
     expect(getHandwritingFont('hw-8').id).toBe('patrick');
     expect(getHandwritingFont('hw-9').id).toBe('reenie');
     expect(getHandwritingFont('caveat').id).toBe('reenie');

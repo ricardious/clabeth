@@ -8,27 +8,13 @@
 @import '@fontsource/patrick-hand/latin-400.css';
 @import '@fontsource-variable/playwrite-es/wght.css';
 
-/* Solo se cargan letras locales cuyas tildes y eñes permanecen legibles en
-   español: HW-3, HW-4 y HW-7. Los demás IDs migran desde fonts.ts. */
+/* Única letra local que queda: HW-3. Las demás se retiraron porque sus glifos
+   acentuados venían injertados de otra fuente y el cuerpo de la letra salía
+   2–3,4× más grueso que en su versión sin tilde. Los IDs retirados migran
+   desde fonts.ts. */
 @font-face {
   font-family: 'HW-3';
   src: url('/fonts/handwriting/Handwriting-3.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'HW-4';
-  src: url('/fonts/handwriting/Handwriting-4.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'HW-7';
-  src: url('/fonts/handwriting/Handwriting-7.ttf') format('truetype');
   font-style: normal;
   font-weight: 400;
   font-display: swap;

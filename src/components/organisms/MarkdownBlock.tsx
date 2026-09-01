@@ -19,6 +19,25 @@ export interface MarkdownBlockProps {
 
 const REMARK_PLUGINS = [remarkGfm, remarkMath];
 
+/**
+ * `splitIntoBlocks` devuelve objetos nuevos en cada pasada, así que la
+ * comparación por identidad no evitaría ningún trabajo: al escribir se
+ * volverían a renderizar todos los bloques del documento. Comparando el
+ * Markdown y los ajustes que afectan al dibujado, solo se rehace el bloque
+ * que cambió.
+ */
+function sameBlock(previous: MarkdownBlockProps, next: MarkdownBlockProps): boolean {
+  return (
+    previous.block.markdown === next.block.markdown &&
+    previous.block.key === next.block.key &&
+    previous.block.pageBreak === next.block.pageBreak &&
+    previous.seed === next.seed &&
+    previous.hand.jitterY === next.hand.jitterY &&
+    previous.hand.jitterRot === next.hand.jitterRot &&
+    previous.hand.slant === next.hand.slant
+  );
+}
+
 /** Renderiza un bloque Markdown/LaTeX con la apariencia manuscrita. */
 export const MarkdownBlock = memo(function MarkdownBlock({ block, seed, hand }: MarkdownBlockProps) {
   // Evita repetir el mismo patrón al inicio de cada bloque Markdown.
@@ -40,4 +59,4 @@ export const MarkdownBlock = memo(function MarkdownBlock({ block, seed, hand }: 
       {block.markdown}
     </ReactMarkdown>
   );
-});
+}, sameBlock);

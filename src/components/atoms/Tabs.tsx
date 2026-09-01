@@ -29,7 +29,7 @@ export function Tabs<T extends string>({ items, active, onChange, ariaLabel, cla
             'transition-colors duration-[var(--dur-fast)]',
             active === item.id
               ? 'bg-primary-soft text-primary'
-              : 'text-muted hover:bg-panel hover:text-foreground',
+              : 'text-muted hover:bg-hover hover:text-foreground',
           )}
         >
           {item.icon}
