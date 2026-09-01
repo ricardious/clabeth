@@ -2,6 +2,8 @@
   "name": "clabeth",
   "private": true,
   "version": "0.1.0",
+  "author": "Alex Ricardo Castañeda Rodríguez",
+  "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.18.2",
   "engines": {
