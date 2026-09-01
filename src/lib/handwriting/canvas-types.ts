@@ -10,6 +10,8 @@ export interface PositionedGlyph {
   height: number;
   font: string;
   fontSize: number;
+  /** Tinta con la que se pinta: la del texto o la de los títulos. */
+  inkId: string;
 }
 
 export interface CanvasPaperConfig {

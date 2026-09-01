@@ -141,7 +141,6 @@ function drawWeightedGlyph(
 
 function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasConfig, rng: () => number): void {
   const preset = PRESETS[config.realismLevel];
-  const ink = getCanvasInk(config.handwriting.inkId);
   const noise = new NoiseStrategy(rng);
   const userJitter = Math.max(0.35, Math.min(1.4, config.handwriting.jitterY || 0.35));
   const baselineRange = preset.baseline * preset.intensity * userJitter;
@@ -153,13 +152,30 @@ function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasCon
   context.textAlign = 'left';
   context.textBaseline = 'alphabetic';
   context.globalCompositeOperation = 'multiply';
-  context.globalAlpha = ink.opacity * config.handwriting.opacity * (1 - ink.roughness * 0.1 - ink.absorption * 0.05);
-  context.shadowColor = `rgba(0, 0, 0, ${Math.min(0.15, ink.bleed * 0.2)})`;
-  context.shadowBlur = Math.max(0.55, ink.absorption * 2, ink.bleed * 1.5);
   context.shadowOffsetX = 0.5;
   context.shadowOffsetY = 0.5;
 
+  /**
+   * Cada glifo trae su tinta, que puede no ser la del texto: los títulos usan
+   * la suya. No basta con cambiar el color, porque el perfil lleva también cómo
+   * se comporta esa tinta (sangrado, absorción, aspereza). Los glifos llegan en
+   * orden del documento, así que los títulos van agrupados y el estado del
+   * contexto cambia unas pocas veces por hoja.
+   */
+  let ink = getCanvasInk(config.glyphs[0]?.inkId ?? config.handwriting.inkId);
+  let currentInkId: string | null = null;
+  const useInk = (inkId: string): void => {
+    if (inkId === currentInkId) return;
+    currentInkId = inkId;
+    ink = getCanvasInk(inkId);
+    context.globalAlpha =
+      ink.opacity * config.handwriting.opacity * (1 - ink.roughness * 0.1 - ink.absorption * 0.05);
+    context.shadowColor = `rgba(0, 0, 0, ${Math.min(0.15, ink.bleed * 0.2)})`;
+    context.shadowBlur = Math.max(0.55, ink.absorption * 2, ink.bleed * 1.5);
+  };
+
   for (const glyph of config.glyphs) {
+    useInk(glyph.inkId);
     context.font = glyph.font;
     const metrics = context.measureText(glyph.char);
     const ascent = metrics.actualBoundingBoxAscent || glyph.fontSize * 0.78;

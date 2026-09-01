@@ -69,7 +69,7 @@ export function CanvasHandwritingLayer({
             canvas.dataset.renderState = 'rendering';
             notify('rendering');
             const pageStyle = window.getComputedStyle(page);
-            const glyphs = collectPositionedGlyphs(source, page);
+            const glyphs = collectPositionedGlyphs(source, page, handwriting.inkId);
             const metrics = await renderHandwritingCanvas(canvas, {
               width,
               height,
