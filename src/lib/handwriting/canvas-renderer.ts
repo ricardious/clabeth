@@ -139,6 +139,35 @@ function drawWeightedGlyph(
   }
 }
 
+/**
+ * Métricas verticales de la *fuente*, no de la tinta del carácter medido.
+ *
+ * Es la diferencia entre `fontBoundingBox*` y `actualBoundingBox*`, y con
+ * `actualBoundingBox*` la línea base salía distinta para cada letra: la caja de
+ * tinta de una `á` sobresale más que la de una `a` por la tilde, así que la
+ * acentuada se dibujaba más abajo (hasta 7 px a 22 px de tamaño en el caso de
+ * `Á`). Las letras acentuadas se hundían bajo el renglón y los ascendentes
+ * flotaban por encima.
+ *
+ * `fontBoundingBox*` depende solo de la fuente y el tamaño, así que todos los
+ * caracteres de una línea comparten línea base, que es lo que significa una
+ * línea base. La variación manuscrita la aporta el jitter con semilla, no un
+ * accidente de la métrica.
+ *
+ * Los valores de reserva cubren los motores sin `fontBoundingBox*`: son
+ * constantes, así que mantienen la propiedad importante de ser iguales para
+ * todos los caracteres.
+ */
+export function fontVerticalMetrics(
+  metrics: TextMetrics,
+  fontSize: number,
+): { ascent: number; descent: number } {
+  return {
+    ascent: metrics.fontBoundingBoxAscent || fontSize * 0.78,
+    descent: metrics.fontBoundingBoxDescent || fontSize * 0.2,
+  };
+}
+
 function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasConfig, rng: () => number): void {
   const preset = PRESETS[config.realismLevel];
   const noise = new NoiseStrategy(rng);
@@ -178,8 +207,7 @@ function drawInk(context: CanvasRenderingContext2D, config: HandwritingCanvasCon
     useInk(glyph.inkId);
     context.font = glyph.font;
     const metrics = context.measureText(glyph.char);
-    const ascent = metrics.actualBoundingBoxAscent || glyph.fontSize * 0.78;
-    const descent = metrics.actualBoundingBoxDescent || glyph.fontSize * 0.2;
+    const { ascent, descent } = fontVerticalMetrics(metrics, glyph.fontSize);
     const baseline = glyph.y + (glyph.height + ascent - descent) / 2;
     const baselineJitter = noise.generateJitter(baselineRange);
     const slantJitter = noise.generateRotation(slantRange);
