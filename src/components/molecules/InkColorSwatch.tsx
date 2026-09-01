@@ -18,13 +18,19 @@ export function InkColorSwatch({ ink, selected, onSelect }: InkColorSwatchProps)
       title={ink.name}
       onClick={() => onSelect(ink.id)}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-full border-2 transition-transform duration-[var(--dur-fast)]',
+        // Disco de papel con la tinta dentro: sobre una superficie oscura, el
+        // grafito queda a 1,07:1 y la muestra desaparecía por completo.
+        'paper-bg flex h-8 w-8 items-center justify-center rounded-full border-2 transition-transform duration-[var(--dur-fast)]',
         selected ? 'scale-110 border-focus-ring' : 'border-outline hover:scale-105',
       )}
-      // La tinta es una variable dinámica de escritura: se asigna aquí.
-      style={{ backgroundColor: `var(${ink.token})` }}
     >
-      {selected && <Check size={14} aria-hidden className="text-paper" />}
+      <span
+        className="flex h-[22px] w-[22px] items-center justify-center rounded-full"
+        // La tinta es una variable dinámica de escritura: se asigna aquí.
+        style={{ backgroundColor: `var(${ink.token})` }}
+      >
+        {selected && <Check size={12} aria-hidden className="text-paper" />}
+      </span>
     </button>
   );
 }
