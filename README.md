@@ -44,6 +44,12 @@ funcional y «Empezar a escribir» crea un documento de bienvenida.
 | `pnpm build`     | typecheck + build de producción (`dist/`) |
 | `pnpm preview`   | Sirve el build localmente                 |
 
+## Contribuir
+
+Las correcciones, propuestas y mejoras son bienvenidas. Consulta
+[CONTRIBUTING.md](CONTRIBUTING.md) para conocer el flujo de trabajo, las
+convenciones del proyecto y los requisitos de un pull request.
+
 ## Funcionalidades
 
 - **Editor Markdown** con barra de herramientas, atajos (Ctrl+B/I/K/S/E/F/Z/Y),
