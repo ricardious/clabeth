@@ -42,12 +42,11 @@ export async function downloadPngFiles(images: string[], baseName: string): Prom
   }
 }
 
-export async function buildPdf(
+export async function createPdf(
   images: string[],
   dims: PageDimensions,
   orientation: PageOrientation,
-  filename: string,
-): Promise<void> {
+): Promise<import('jspdf').jsPDF> {
   const { jsPDF } = await import('jspdf');
   const pdf = new jsPDF({
     orientation: orientation === 'vertical' ? 'portrait' : 'landscape',
@@ -61,5 +60,15 @@ export async function buildPdf(
     }
     pdf.addImage(image, 'PNG', 0, 0, dims.width, dims.height);
   });
+  return pdf;
+}
+
+export async function buildPdf(
+  images: string[],
+  dims: PageDimensions,
+  orientation: PageOrientation,
+  filename: string,
+): Promise<void> {
+  const pdf = await createPdf(images, dims, orientation);
   pdf.save(filename);
 }
