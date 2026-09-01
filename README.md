@@ -6,12 +6,14 @@ escritura manuscrita.**
 Editor de Markdown, cuaderno digital y editor de fórmulas en uno. Escribe en
 texto plano, personaliza papel, letra y tinta, y exporta a PDF o PNG.
 
-## Video promocional
-
 <p align="center">
   <a href="docs/assets/clabeth-promo.mp4">
-    <img src="docs/assets/clabeth-promo-preview.gif" alt="Video promocional de Clabeth" width="900">
+    <img src="docs/assets/clabeth-promo-preview.gif" alt="Demostración de Clabeth" width="900">
   </a>
+</p>
+
+<p align="center">
+  Próximamente en <a href="https://clabeth.ricardious.dev">clabeth.ricardious.dev</a>
 </p>
 
 ## Requisitos
